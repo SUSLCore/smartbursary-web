@@ -13,10 +13,7 @@ const ROLE_TO_DASHBOARD_PATH: Record<string, string> = {
   FACULTY_MA: "/fac_ma",
 };
 
-const TOKEN_COOKIE_NAMES = ["token", "authToken", "accessToken", "jwt"];
-const ROLE_COOKIE_NAMES = ["role", "userRole"];
-
-function getDashboardPathFromRole(role: string | null) {
+function getDashboardPathFromRole(role: string | undefined) {
   if (!role) {
     return null;
   }
@@ -24,49 +21,38 @@ function getDashboardPathFromRole(role: string | null) {
   return ROLE_TO_DASHBOARD_PATH[role.toUpperCase()] ?? null;
 }
 
-function getRoleFromJwt(token: string) {
-  try {
-    const payload = token.split(".")[1];
-    if (!payload) {
-      return null;
-    }
-
-    const decodedPayload = Buffer.from(payload, "base64url").toString("utf-8");
-    const parsedPayload = JSON.parse(decodedPayload) as {
-      role?: string;
-      user?: { role?: string };
-    };
-
-    return parsedPayload.role ?? parsedPayload.user?.role ?? null;
-  } catch {
-    return null;
-  }
-}
+type MeApiResponse = {
+	success: boolean;
+	message: string;
+	user?: {
+		role?: string;
+	};
+};
 
 export default async function Home() {
   const cookieStore = await cookies();
+	const API_SERVER_BASE_URL =
+		process.env.API_SERVER_BASE_URL ?? "http://localhost:5000/api";
 
-  let roleFromCookie: string | null = null;
-  for (const roleCookieName of ROLE_COOKIE_NAMES) {
-    const roleValue = cookieStore.get(roleCookieName)?.value;
-    if (roleValue) {
-      roleFromCookie = roleValue;
-      break;
-    }
-  }
+	let dashboardPath: string | null = null;
+	try {
+		const response = await fetch(`${API_SERVER_BASE_URL}/auth/me`, {
+			method: "GET",
+			headers: {
+				Cookie: cookieStore.toString(),
+			},
+			cache: "no-store",
+		});
 
-  let roleFromToken: string | null = null;
-  for (const tokenCookieName of TOKEN_COOKIE_NAMES) {
-    const tokenValue = cookieStore.get(tokenCookieName)?.value;
-    if (tokenValue) {
-      roleFromToken = getRoleFromJwt(tokenValue);
-      break;
-    }
-  }
-
-  const dashboardPath =
-    getDashboardPathFromRole(roleFromCookie) ||
-    getDashboardPathFromRole(roleFromToken);
+		if (response.ok) {
+			const data = (await response.json()) as MeApiResponse;
+			if (data.success && data.user?.role) {
+				dashboardPath = getDashboardPathFromRole(data.user.role);
+			}
+		}
+	} catch {
+		dashboardPath = null;
+	}
 
   if (dashboardPath) {
     redirect(dashboardPath);

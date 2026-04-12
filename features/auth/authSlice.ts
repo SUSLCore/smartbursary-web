@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-import { loginUser } from "./authThunk";
+import { loginUser, validateAuth } from "./authThunk";
 import { AuthRole, AuthState, AuthUser } from "./authTypes";
 
 const initialState: AuthState = {
@@ -38,6 +38,26 @@ const authSlice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder
+			.addCase(validateAuth.pending, (state) => {
+				state.status = "loading";
+				state.error = null;
+			})
+			.addCase(validateAuth.fulfilled, (state, action) => {
+				state.status = "succeeded";
+				state.user = action.payload.user ?? null;
+				state.role = action.payload.user?.role ?? null;
+				state.isAuthenticated = Boolean(action.payload.user);
+				state.error = null;
+				state.message = action.payload.message;
+			})
+			.addCase(validateAuth.rejected, (state, action) => {
+				state.status = "failed";
+				state.user = null;
+				state.role = null;
+				state.isAuthenticated = false;
+				state.error = null;
+				state.message = action.payload ?? "Unauthorized";
+			})
 			.addCase(loginUser.pending, (state) => {
 				state.status = "loading";
 				state.error = null;

@@ -2,7 +2,7 @@ import { isAxiosError } from "axios";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 import authService from "./authService";
-import { LoginRequest, LoginResponse } from "./authTypes";
+import { LoginRequest, LoginResponse, MeResponse } from "./authTypes";
 
 export const loginUser = createAsyncThunk<
 	LoginResponse,
@@ -24,5 +24,26 @@ export const loginUser = createAsyncThunk<
 		}
 
 		return rejectWithValue("Login failed. Please try again.");
+	}
+});
+
+export const validateAuth = createAsyncThunk<
+	MeResponse,
+	void,
+	{ rejectValue: string }
+>("auth/validateAuth", async (_, { rejectWithValue }) => {
+	try {
+		const response = await authService.me();
+		if (!response.success || !response.user) {
+			return rejectWithValue(response.message || "Unauthorized");
+		}
+
+		return response;
+	} catch (error) {
+		if (isAxiosError<{ message?: string }>(error)) {
+			return rejectWithValue(error.response?.data?.message ?? "Unauthorized");
+		}
+
+		return rejectWithValue("Unauthorized");
 	}
 });

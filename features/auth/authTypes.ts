@@ -33,6 +33,12 @@ export type LoginResponse = {
 	user: AuthUser;
 };
 
+export type MeResponse = {
+	success: boolean;
+	message: string;
+	user?: AuthUser;
+};
+
 export type AuthState = {
 	user: AuthUser | null;
 	role: AuthRole | null;
