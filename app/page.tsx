@@ -1,6 +1,63 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+const ROLE_TO_DASHBOARD_PATH: Record<string, string> = {
+  ADMIN: "/admin",
+  STUDENT: "/student",
+  SAR: "/sar",
+  MA: "/ma",
+  FAC_AR: "/fac_ar",
+  FAC_MA: "/fac_ma",
+  FACULTY_AR: "/fac_ar",
+  FACULTY_MA: "/fac_ma",
+};
+
+function getDashboardPathFromRole(role: string | undefined) {
+  if (!role) {
+    return null;
+  }
+
+  return ROLE_TO_DASHBOARD_PATH[role.toUpperCase()] ?? null;
+}
+
+type MeApiResponse = {
+	success: boolean;
+	message: string;
+	user?: {
+		role?: string;
+	};
+};
+
+export default async function Home() {
+  const cookieStore = await cookies();
+	const API_SERVER_BASE_URL =
+		process.env.API_SERVER_BASE_URL ?? "http://localhost:5000/api";
+
+	let dashboardPath: string | null = null;
+	try {
+		const response = await fetch(`${API_SERVER_BASE_URL}/auth/me`, {
+			method: "GET",
+			headers: {
+				Cookie: cookieStore.toString(),
+			},
+			cache: "no-store",
+		});
+
+		if (response.ok) {
+			const data = (await response.json()) as MeApiResponse;
+			if (data.success && data.user?.role) {
+				dashboardPath = getDashboardPathFromRole(data.user.role);
+			}
+		}
+	} catch {
+		dashboardPath = null;
+	}
+
+  if (dashboardPath) {
+    redirect(dashboardPath);
+  }
+
   return (
     <main className="min-h-screen bg-slate-50">
       <section className="mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-12 sm:px-6 lg:px-8">
