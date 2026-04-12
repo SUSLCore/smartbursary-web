@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-import { loginUser, validateAuth } from "./authThunk";
+import { loginUser, logoutUser, validateAuth } from "./authThunk";
 import { AuthRole, AuthState, AuthUser } from "./authTypes";
 
 const initialState: AuthState = {
@@ -76,6 +76,26 @@ const authSlice = createSlice({
 				state.role = null;
 				state.isAuthenticated = false;
 				state.error = action.payload ?? "Login failed. Please try again.";
+			})
+			.addCase(logoutUser.pending, (state) => {
+				state.status = "loading";
+				state.error = null;
+			})
+			.addCase(logoutUser.fulfilled, (state, action) => {
+				state.status = "idle";
+				state.user = null;
+				state.role = null;
+				state.isAuthenticated = false;
+				state.error = null;
+				state.message = action.payload.message;
+			})
+			.addCase(logoutUser.rejected, (state, action) => {
+				state.status = "idle";
+				state.user = null;
+				state.role = null;
+				state.isAuthenticated = false;
+				state.error = null;
+				state.message = action.payload ?? "Logged out";
 			});
 	},
 });

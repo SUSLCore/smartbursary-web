@@ -39,6 +39,11 @@ export type MeResponse = {
 	user?: AuthUser;
 };
 
+export type LogoutResponse = {
+	success: boolean;
+	message: string;
+};
+
 export type AuthState = {
 	user: AuthUser | null;
 	role: AuthRole | null;

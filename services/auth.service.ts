@@ -35,9 +35,22 @@ export type ApiResponse<T> = {
 	data: T;
 };
 
-export type LoginResponseData = {
-	token: string;
+export type LoginResponse = {
+	success: boolean;
+	message: string;
+	role: string;
 	user: UserRecord;
+};
+
+export type MeResponse = {
+	success: boolean;
+	message: string;
+	user?: UserRecord;
+};
+
+export type LogoutResponse = {
+	success: boolean;
+	message: string;
 };
 
 export const authService = {
@@ -51,9 +64,19 @@ export const authService = {
 	},
 
 	async login(payload: LoginPayload) {
-		const response = await axiosInstance.post<
-			ApiResponse<LoginResponseData | UserRecord>
-		>("/auth/login", payload);
+		const response = await axiosInstance.post<LoginResponse>("/auth/login", payload);
+
+		return response.data;
+	},
+
+	async me() {
+		const response = await axiosInstance.get<MeResponse>("/auth/me");
+
+		return response.data;
+	},
+
+	async logout() {
+		const response = await axiosInstance.post<LogoutResponse>("/auth/logout", {});
 
 		return response.data;
 	},

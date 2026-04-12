@@ -1,8 +1,13 @@
 import { isAxiosError } from "axios";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-import authService from "./authService";
-import { LoginRequest, LoginResponse, MeResponse } from "./authTypes";
+import authService from "@/services/auth.service";
+import {
+	LoginRequest,
+	LoginResponse,
+	LogoutResponse,
+	MeResponse,
+} from "./authTypes";
 
 export const loginUser = createAsyncThunk<
 	LoginResponse,
@@ -45,5 +50,26 @@ export const validateAuth = createAsyncThunk<
 		}
 
 		return rejectWithValue("Unauthorized");
+	}
+});
+
+export const logoutUser = createAsyncThunk<
+	LogoutResponse,
+	void,
+	{ rejectValue: string }
+>("auth/logoutUser", async (_, { rejectWithValue }) => {
+	try {
+		const response = await authService.logout();
+		if (!response.success) {
+			return rejectWithValue(response.message || "Logout failed");
+		}
+
+		return response;
+	} catch (error) {
+		if (isAxiosError<{ message?: string }>(error)) {
+			return rejectWithValue(error.response?.data?.message ?? "Logout failed");
+		}
+
+		return rejectWithValue("Logout failed");
 	}
 });
