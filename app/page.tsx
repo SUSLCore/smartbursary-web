@@ -1,6 +1,77 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+const ROLE_TO_DASHBOARD_PATH: Record<string, string> = {
+  ADMIN: "/admin",
+  STUDENT: "/student",
+  SAR: "/sar",
+  MA: "/ma",
+  FAC_AR: "/fac_ar",
+  FAC_MA: "/fac_ma",
+  FACULTY_AR: "/fac_ar",
+  FACULTY_MA: "/fac_ma",
+};
+
+const TOKEN_COOKIE_NAMES = ["token", "authToken", "accessToken", "jwt"];
+const ROLE_COOKIE_NAMES = ["role", "userRole"];
+
+function getDashboardPathFromRole(role: string | null) {
+  if (!role) {
+    return null;
+  }
+
+  return ROLE_TO_DASHBOARD_PATH[role.toUpperCase()] ?? null;
+}
+
+function getRoleFromJwt(token: string) {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) {
+      return null;
+    }
+
+    const decodedPayload = Buffer.from(payload, "base64url").toString("utf-8");
+    const parsedPayload = JSON.parse(decodedPayload) as {
+      role?: string;
+      user?: { role?: string };
+    };
+
+    return parsedPayload.role ?? parsedPayload.user?.role ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function Home() {
+  const cookieStore = await cookies();
+
+  let roleFromCookie: string | null = null;
+  for (const roleCookieName of ROLE_COOKIE_NAMES) {
+    const roleValue = cookieStore.get(roleCookieName)?.value;
+    if (roleValue) {
+      roleFromCookie = roleValue;
+      break;
+    }
+  }
+
+  let roleFromToken: string | null = null;
+  for (const tokenCookieName of TOKEN_COOKIE_NAMES) {
+    const tokenValue = cookieStore.get(tokenCookieName)?.value;
+    if (tokenValue) {
+      roleFromToken = getRoleFromJwt(tokenValue);
+      break;
+    }
+  }
+
+  const dashboardPath =
+    getDashboardPathFromRole(roleFromCookie) ||
+    getDashboardPathFromRole(roleFromToken);
+
+  if (dashboardPath) {
+    redirect(dashboardPath);
+  }
+
   return (
     <main className="min-h-screen bg-slate-50">
       <section className="mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-12 sm:px-6 lg:px-8">
