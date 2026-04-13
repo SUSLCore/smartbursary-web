@@ -75,6 +75,28 @@ export const authService = {
 		return response.data;
 	},
 
+	async meWithCookie(cookieHeader: string) {
+		const apiServerBaseUrl =
+			process.env.API_SERVER_BASE_URL ?? "http://localhost:5000/api";
+
+		const response = await fetch(`${apiServerBaseUrl}/auth/me`, {
+			method: "GET",
+			headers: {
+				Cookie: cookieHeader,
+			},
+			cache: "no-store",
+		});
+
+		if (!response.ok) {
+			return {
+				success: false,
+				message: "Unauthorized",
+			} satisfies MeResponse;
+		}
+
+		return (await response.json()) as MeResponse;
+	},
+
 	async logout() {
 		const response = await axiosInstance.post<LogoutResponse>("/auth/logout", {});
 
