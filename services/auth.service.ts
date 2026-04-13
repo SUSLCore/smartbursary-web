@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import axiosInstance from "@/lib/axios";
 
 export type RegisterStudentPayload = {
@@ -76,25 +77,33 @@ export const authService = {
 	},
 
 	async meWithCookie(cookieHeader: string) {
-		const apiServerBaseUrl =
-			process.env.API_SERVER_BASE_URL ?? "http://localhost:5000/api";
+		try {
+			const apiServerBaseUrl =
+				process.env.API_SERVER_BASE_URL ?? "http://localhost:5000/api";
 
-		const response = await fetch(`${apiServerBaseUrl}/auth/me`, {
-			method: "GET",
-			headers: {
-				Cookie: cookieHeader,
-			},
-			cache: "no-store",
-		});
+			const response = await axiosInstance.get<MeResponse>("/auth/me", {
+				baseURL: apiServerBaseUrl,
+				headers: {
+					Cookie: cookieHeader,
+				},
+			});
 
-		if (!response.ok) {
+			return response.data;
+		} catch (error) {
+			if (isAxiosError<MeResponse>(error)) {
+				return (
+					error.response?.data ?? {
+						success: false,
+						message: "Unauthorized",
+					}
+				);
+			}
+
 			return {
 				success: false,
 				message: "Unauthorized",
-			} satisfies MeResponse;
+			};
 		}
-
-		return (await response.json()) as MeResponse;
 	},
 
 	async logout() {
