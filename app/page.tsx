@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import authService from "@/services/auth.service";
 
 const ROLE_TO_DASHBOARD_PATH: Record<string, string> = {
   ADMIN: "/admin",
@@ -21,34 +22,14 @@ function getDashboardPathFromRole(role: string | undefined) {
   return ROLE_TO_DASHBOARD_PATH[role.toUpperCase()] ?? null;
 }
 
-type MeApiResponse = {
-	success: boolean;
-	message: string;
-	user?: {
-		role?: string;
-	};
-};
-
 export default async function Home() {
   const cookieStore = await cookies();
-	const API_SERVER_BASE_URL =
-		process.env.API_SERVER_BASE_URL ?? "http://localhost:5000/api";
 
 	let dashboardPath: string | null = null;
 	try {
-		const response = await fetch(`${API_SERVER_BASE_URL}/auth/me`, {
-			method: "GET",
-			headers: {
-				Cookie: cookieStore.toString(),
-			},
-			cache: "no-store",
-		});
-
-		if (response.ok) {
-			const data = (await response.json()) as MeApiResponse;
-			if (data.success && data.user?.role) {
-				dashboardPath = getDashboardPathFromRole(data.user.role);
-			}
+    const data = await authService.meWithCookie(cookieStore.toString());
+    if (data.success && data.user?.role) {
+      dashboardPath = getDashboardPathFromRole(data.user.role);
 		}
 	} catch {
 		dashboardPath = null;
