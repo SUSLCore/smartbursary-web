@@ -1,27 +1,26 @@
 import axios from "axios";
 
-export const API_BASE_URL =
-	process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const axiosInstance = axios.create({
-	baseURL: API_BASE_URL,
-	withCredentials: true,
-	headers: {
-		"Content-Type": "application/json",
-	},
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-axiosInstance.interceptors.request.use((config) => {
-	if (typeof window === "undefined") {
-		return config;
-	}
+export const api = {
+  get: async (url: string) => {
+    const res = await axiosInstance.get(url);
+    return res.data;
+  },
 
-	const token = window.localStorage.getItem("accessToken");
-	if (token) {
-		config.headers.Authorization = `Bearer ${token}`;
-	}
-
-	return config;
-});
+  post: async (url: string, data: unknown) => {
+    const res = await axiosInstance.post(url, data);
+    return res.data;
+  },
+};
 
 export default axiosInstance;
