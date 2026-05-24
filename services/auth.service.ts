@@ -57,7 +57,7 @@ export type LogoutResponse = {
 export const authService = {
 	async registerStudent(payload: RegisterStudentPayload) {
 		const response = await axiosInstance.post<ApiResponse<UserRecord>>(
-			"/auth/register-student",
+			"/api/auth/register-student",
 			payload,
 		);
 
@@ -65,23 +65,23 @@ export const authService = {
 	},
 
 	async login(payload: LoginPayload) {
-		const response = await axiosInstance.post<LoginResponse>("/auth/login", payload);
+		const response = await axiosInstance.post<LoginResponse>("/api/auth/login", payload);
 
 		return response.data;
 	},
 
 	async me() {
-		const response = await axiosInstance.get<MeResponse>("/auth/me");
+		const response = await axiosInstance.get<MeResponse>("/api/auth/me");
 
 		return response.data;
 	},
 
 	async meWithCookie(cookieHeader: string) {
 		try {
-			const apiServerBaseUrl =
-				process.env.API_SERVER_BASE_URL ?? "http://localhost:5000/api";
+			// Ensure base URL points to the API server root (no duplicate /api)
+			const apiServerBaseUrl = process.env.API_SERVER_BASE_URL ?? "http://localhost:5000";
 
-			const response = await axiosInstance.get<MeResponse>("/auth/me", {
+			const response = await axiosInstance.get<MeResponse>("/api/auth/me", {
 				baseURL: apiServerBaseUrl,
 				headers: {
 					Cookie: cookieHeader,
@@ -107,7 +107,7 @@ export const authService = {
 	},
 
 	async logout() {
-		const response = await axiosInstance.post<LogoutResponse>("/auth/logout", {});
+		const response = await axiosInstance.post<LogoutResponse>("/api/auth/logout", {});
 
 		return response.data;
 	},
