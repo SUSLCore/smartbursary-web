@@ -11,21 +11,36 @@ import { AppDispatch, RootState } from "@/redux/store";
 
 const ROLE_TO_DASHBOARD_PATH: Record<string, string> = {
   ADMIN: "/admin",
+
+  STUDENT_SERVICE_SAR: "/student-service-sar",
+  STUDENT_SERVICE_MA: "/student-service-ma",
+
   STUDENT: "/student",
   SAR: "/sar",
   MA: "/ma",
+
   FAC_AR: "/fac_ar",
   FAC_MA: "/fac_ma",
   FACULTY_AR: "/fac_ar",
   FACULTY_MA: "/fac_ma",
+
+  DEPARTMENT_HEAD: "/department-head",
 };
 
-function getDashboardPath(role: string | null) {
-  if (!role) {
-    return "/";
-  }
+function getDashboardPath(
+  role: string | null
+) {
 
-  return ROLE_TO_DASHBOARD_PATH[role.toUpperCase()] ?? "/";
+  if (!role) {  return "/";}
+
+  return (
+    ROLE_TO_DASHBOARD_PATH[
+    role.toUpperCase()]|| 
+    
+    "/"
+
+  );
+
 }
 
 export default function LoginPage() {
@@ -65,11 +80,31 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await dispatch(loginUser({ email, password })).unwrap();
-      router.push(getDashboardPath(response.role || response.user.role));
+
+      const response =
+        await dispatch(
+          loginUser({
+            email,
+            password,
+          })
+        ).unwrap();
+
+      const userRole =
+        response?.user?.role ||
+        response?.role;
+
+      router.push(
+        getDashboardPath(
+          userRole
+        )
+      );
+
     } catch {
-      // Error is already handled by the slice.
+
+      // Error handled
+
     }
+
   };
 
   return (
