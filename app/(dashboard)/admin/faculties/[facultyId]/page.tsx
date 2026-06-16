@@ -1,28 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/lib/axios";
+import {
+  getDepartmentsByFaculty,
+  Department,
+} from "@/services/admin.service";
+import OfficerForm from "@/components/OfficerForm";
+
 import { useParams, useRouter } from "next/navigation";
 
-type Department = {
-  id: number;
-  name: string;
-  facultyId: number;
-};
-
-export default function FacultyDepartmentsPage() {
+export default function FacultyPage() {
   const params = useParams();
   const router = useRouter();
 
-  const facultyId = params.facultyId as string;
+  const facultyId = Number(
+    params.facultyId
+  );
 
-  const [departments, setDepartments] = useState<Department[]>([]);
+  const [departments, setDepartments] =
+    useState<Department[]>([]);
 
   useEffect(() => {
     const loadDepartments = async () => {
-      const data = await api.get(
-        `/api/faculties/${facultyId}/departments`
-      );
+      const data =
+        await getDepartmentsByFaculty(
+          facultyId
+        );
+
       setDepartments(data);
     };
 
@@ -30,33 +34,53 @@ export default function FacultyDepartmentsPage() {
   }, [facultyId]);
 
   return (
-    <div className="p-6">
+    <div className="space-y-8 p-8">
       <button
-        onClick={() => router.push("/admin")}
-        className="mb-4 rounded border px-4 py-2"
+        onClick={() =>
+          router.push("/admin/faculties")
+        }
       >
-        Back
+        ← Back
       </button>
 
-      <h1 className="text-2xl font-bold">Departments</h1>
-      <p className="mt-2 text-gray-600">
-        Select a department to create officers
-      </p>
+      <h1 className="text-3xl font-bold">
+        Faculty Management
+      </h1>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {departments.map((department) => (
-          <button
-            key={department.id}
-            onClick={() =>
-              router.push(
-                `/admin/faculties/${facultyId}/departments/${department.id}/officers/create`
-              )
-            }
-            className="rounded-xl border bg-white p-6 text-left shadow hover:shadow-md"
-          >
-            <h2 className="text-lg font-semibold">{department.name}</h2>
-          </button>
-        ))}
+      <div className="grid gap-8 lg:grid-cols-2">
+        <OfficerForm
+          title="Create Faculty AR"
+          role="FACULTY_AR"
+          facultyId={facultyId}
+        />
+
+        <OfficerForm
+          title="Create Faculty MA"
+          role="FACULTY_MA"
+          facultyId={facultyId}
+        />
+      </div>
+
+      <div>
+        <h2 className="mb-4 text-2xl font-semibold">
+          Departments
+        </h2>
+
+        <div className="grid gap-4">
+          {departments.map((department) => (
+            <button
+              key={department.id}
+              onClick={() =>
+                router.push(
+                  `/admin/faculties/${facultyId}/departments/${department.id}`
+                )
+              }
+              className="rounded-xl border bg-white p-5 text-left shadow"
+            >
+              {department.name}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
