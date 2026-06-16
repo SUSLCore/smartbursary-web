@@ -70,11 +70,11 @@ export const authService = {
 		return response.data;
 	},
 
-	// async me() {
-	// 	const response = await axiosInstance.get<MeResponse>("/api/auth/me");
+	async me() {
+		const response = await axiosInstance.get<MeResponse>("/api/auth/me");
 
-	// 	return response.data;
-	// },
+		return response.data;
+	},
 
 	async meWithCookie(cookieHeader: string) {
 		try {
