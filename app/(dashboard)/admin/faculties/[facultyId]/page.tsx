@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import {
   getDepartmentsByFaculty,
   Department,
-} from "@/services/admin.Service";
-
+} from "@/services/admin.service";
 import OfficerForm from "@/components/OfficerForm";
 
 import { useParams, useRouter } from "next/navigation";

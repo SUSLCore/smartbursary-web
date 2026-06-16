@@ -8,7 +8,7 @@ import {
   createFacultyMA,
   createDepartmentHead,
   createDepartmentMA,
-} from "@/services/admin.Service";
+} from "@/services/admin.service";
 
 interface OfficerFormProps {
   title: string;
