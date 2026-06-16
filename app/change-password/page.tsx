@@ -22,15 +22,11 @@ export default function ChangePasswordPage() {
     const ROLE_TO_DASHBOARD_PATH: Record<string, string> = {
         ADMIN: "/admin",
         STUDENT_SERVICE_SAR: "/student-service-sar",
-        STUDENT_SERVICE_MA: "/student-service-ma",
-        STUDENT: "/student",
-        SAR: "/sar",
-        MA: "/ma",
-        FAC_AR: "/fac_ar",
-        FAC_MA: "/fac_ma",
-        FACULTY_AR: "/fac_ar",
-        FACULTY_MA: "/fac_ma",
+        FACULTY_AR: "/faculty-ar",
+        FACULTY_MA: "/faculty-ma",
         DEPARTMENT_HEAD: "/department-head",
+        DEPARTMENT_MA: "/department-ma",
+        STUDENT: "/student",
     };
 
     function getDashboardPath(role: string | null) {
