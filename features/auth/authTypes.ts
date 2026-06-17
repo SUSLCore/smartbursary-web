@@ -1,10 +1,11 @@
 export type AuthRole =
 	| "ADMIN"
 	| "STUDENT"
-	| "SAR"
-	| "MA"
-	| "FAC_AR"
-	| "FAC_MA"
+	| "STUDENT_SERVICE_SAR"
+	| "FACULTY_AR"
+	| "FACULTY_MA"
+	| "DEPARTMENT_HEAD"
+	| "DEPARTMENT_MA"
 	| string;
 
 export type AuthUser = {
