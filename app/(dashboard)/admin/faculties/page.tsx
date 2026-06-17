@@ -4,6 +4,19 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getFaculties, type Faculty } from "@/services/admin.service";
 
+type ApiError = {
+	response?: {
+		data?: {
+			message?: string;
+		};
+	};
+};
+
+function getErrorMessage(error: unknown, fallback: string) {
+	const apiError = error as ApiError;
+	return apiError?.response?.data?.message ?? fallback;
+}
+
 export default function FacultiesPage() {
 	const router = useRouter();
 	const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -16,10 +29,12 @@ export default function FacultiesPage() {
 				setError("");
 				const data = await getFaculties();
 				setFaculties(data);
-			} catch (err: any) {
+			} catch (error: unknown) {
 				setError(
-					err?.response?.data?.message ??
+					getErrorMessage(
+						error,
 						"Failed to load faculties"
+					)
 				);
 			} finally {
 				setLoading(false);
