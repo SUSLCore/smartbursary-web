@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Image from "next/image";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,43 +11,29 @@ import { AppDispatch, RootState } from "@/redux/store";
 
 const ROLE_TO_DASHBOARD_PATH: Record<string, string> = {
   ADMIN: "/admin",
-
   STUDENT_SERVICE_SAR: "/student-service-sar",
   STUDENT_SERVICE_MA: "/student-service-ma",
-
   STUDENT: "/student",
   SAR: "/sar",
   MA: "/ma",
-
   FAC_AR: "/fac_ar",
   FAC_MA: "/fac_ma",
   FACULTY_AR: "/fac_ar",
   FACULTY_MA: "/fac_ma",
-
   DEPARTMENT_HEAD: "/department-head",
 };
 
-function getDashboardPath(
-  role: string | null
-) {
-
-  if (!role) {  return "/";}
-
-  return (
-    ROLE_TO_DASHBOARD_PATH[
-    role.toUpperCase()]|| 
-    
-    "/"
-
-  );
-
+function getDashboardPath(role: string | null) {
+  if (!role) return "/";
+  return ROLE_TO_DASHBOARD_PATH[role.toUpperCase()] || "/";
 }
 
 export default function LoginPage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+
   const { status, error, role, isAuthenticated } = useSelector(
-    (state: RootState) => state.auth,
+    (state: RootState) => state.auth
   );
 
   const [email, setEmail] = useState("");
@@ -80,73 +66,69 @@ export default function LoginPage() {
     }
 
     try {
-
-      const response =
-        await dispatch(
-          loginUser({
-            email,
-            password,
-          })
-        ).unwrap();
-
-      const userRole =
-        response?.user?.role ||
-        response?.role;
-
-      router.push(
-        getDashboardPath(
-          userRole
-        )
-      );
-
+      const response = await dispatch(loginUser({ email, password })).unwrap();
+      const userRole = response?.user?.role || response?.role;
+      router.push(getDashboardPath(userRole));
     } catch {
-
-      // Error handled
-
+      // Error handled by Redux
     }
-
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-md rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
-        <p className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
-          SmartBursery
-        </p>
-        <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900">
-          Sign in to your account
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Your role in Redux state will decide the dashboard route after login.
-        </p>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#e9ebf2] px-4">
+      <div className="absolute left-0 top-0 h-full w-[31vw] min-w-[300px] bg-[#27b8d2]" />
 
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
-          <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-700">Email</span>
+      <div className="absolute left-[7vw] top-[10vh] h-[76vh] w-[37vw] min-w-[350px] rounded-l-[26px] bg-[#e9ebf2]" />
+
+      <div className="relative z-10 -mt-16 flex w-full max-w-[820px] flex-col items-center">
+        <div className="mb-16 flex items-center justify-center gap-3 -ml-10">
+          <Image
+            src="/images/smartbursery-logo.png"
+            alt="SmartBursery Logo"
+            width={130}
+            height={130}
+            className="h-auto w-auto object-contain"
+            priority
+          />
+
+          <h1 className="text-center text-[28px] font-extrabold leading-[34px] tracking-wide text-[#17365d]">
+            SUSL BURSARY
+            
+            MANAGEMENT SYSTEM
+          </h1>
+        </div>
+
+        <form onSubmit={onSubmit} className="w-full max-w-[380px]">
+          <label className="mb-5 block">
+            <span className="mb-2 block text-[15px] font-semibold text-[#17365d]">
+              Email Address
+            </span>
             <input
               type="email"
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-500"
-              placeholder="binoj@student.com"
+              className="h-[54px] w-full rounded-xl border-2 border-[#20b8d4] bg-transparent px-5 text-[15px] outline-none transition placeholder:text-slate-500 focus:ring-2 focus:ring-[#20b8d4]/30"
+              placeholder="Enter your email"
             />
           </label>
 
-          <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-700">Password</span>
+          <label className="mb-6 block">
+            <span className="mb-2 block text-[15px] font-semibold text-[#17365d]">
+              Password
+            </span>
             <input
               type="password"
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-500"
-              placeholder="********"
+              className="h-[54px] w-full rounded-xl border-2 border-[#20b8d4] bg-transparent px-5 text-[15px] outline-none transition placeholder:text-slate-500 focus:ring-2 focus:ring-[#20b8d4]/30"
+              placeholder="Enter your password"
             />
           </label>
 
           {formError ? (
-            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {formError}
             </p>
           ) : null}
@@ -154,18 +136,11 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+            className="h-[54px] w-full rounded-xl bg-[#27b8d2] text-[16px] font-semibold text-white shadow-md transition-all hover:bg-[#1ca9c3] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isLoading ? "Signing in..." : "Login"}
+            {isLoading ? "Signing In..." : "Login"}
           </button>
         </form>
-
-        <p className="mt-5 text-center text-sm text-slate-600">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-semibold text-slate-900 underline">
-            Register
-          </Link>
-        </p>
       </div>
     </div>
   );
