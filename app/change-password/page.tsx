@@ -6,6 +6,19 @@ import axiosInstance from "@/lib/axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
+type ApiError = {
+    response?: {
+        data?: {
+            message?: string;
+        };
+    };
+};
+
+function getErrorMessage(error: unknown, fallback: string) {
+    const apiError = error as ApiError;
+    return apiError?.response?.data?.message ?? fallback;
+}
+
 export default function ChangePasswordPage() {
     const router = useRouter();
     const user = useSelector(
@@ -64,8 +77,8 @@ export default function ChangePasswordPage() {
 
             const role = user?.role ?? null;
             router.push(getDashboardPath(role));
-        } catch (err: any) {
-            setError(err?.response?.data?.message ?? "Failed to change password");
+        } catch (error: unknown) {
+            setError(getErrorMessage(error, "Failed to change password"));
         } finally {
             setLoading(false);
         }

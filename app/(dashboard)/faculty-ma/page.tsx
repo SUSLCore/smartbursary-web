@@ -1,27 +1,51 @@
 "use client";
 
-import React from "react";
-import AuthGuard from "@/components/AuthGuard";
-import DashboardView from "@/components/DashboardView";
+import { useRouter } from "next/navigation";
 
-export default function FacultyMaPage() {
-	return (
-		<AuthGuard>
-			<DashboardView
-				userType="Faculty MA"
-				title="Faculty MA Dashboard"
-				summary="View assigned applications, validate supporting documents, and support bursary decision-making from a focused workspace."
-				stats={[
-					{ label: "Items to verify", value: "9", description: "Records awaiting your confirmation." },
-					{ label: "In progress", value: "21", description: "Applications currently moving through the workflow." },
-					{ label: "Completed", value: "14", description: "Tasks finished this week." },
-				]}
-				items={[
-					"Validate attached records and comments.",
-					"Coordinate updates with other faculty reviewers.",
-					"Maintain a simple view of your active workload.",
-				]}
-			/>
-		</AuthGuard>
-	);
+import DepartmentCard from "@/components/DepartmentCard";
+import { useDepartments } from "@/hooks/useDepartments";
+
+export default function FacultyMADashboard() {
+  const router = useRouter();
+
+  const { departments, loading } =
+    useDepartments();
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        Loading Departments...
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">
+          My Departments
+        </h1>
+
+        <p className="text-gray-500 mt-2">
+          Select a department to manage
+          bursary documents.
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {departments.map((department) => (
+          <DepartmentCard
+            key={department.id}
+            department={department}
+            onClick={() =>
+              router.push(
+                `/faculty-ma/departments/${department.id}`
+              )
+            }
+          />
+        ))}
+      </div>
+    </div>
+  );
 }

@@ -10,6 +10,19 @@ import {
   createDepartmentMA,
 } from "@/services/admin.service";
 
+type ApiError = {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
+function getErrorMessage(error: unknown, fallback: string) {
+  const apiError = error as ApiError;
+  return apiError?.response?.data?.message ?? fallback;
+}
+
 interface OfficerFormProps {
   title: string;
   role:
@@ -107,10 +120,9 @@ export default function OfficerForm({
         password: "",
         role,
       });
-    } catch (err: any) {
+    } catch (error: unknown) {
       setError(
-        err?.response?.data?.message ??
-          "Failed to create account"
+        getErrorMessage(error, "Failed to create account")
       );
     } finally {
       setLoading(false);
