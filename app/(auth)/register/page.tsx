@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, useMemo, useState } from "react";
 
 import authService from "@/services/auth.service";
@@ -78,6 +79,7 @@ export default function RegisterPage() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [message, setMessage] = useState("");
 	const [error, setError] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
 
 	const availableDepartments = useMemo(() => {
 		if (!form.facultyId) {
@@ -137,156 +139,240 @@ export default function RegisterPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
-			<div className="mx-auto max-w-3xl rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
-				<div className="mb-8 space-y-2">
-					<p className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
-						SmartBursery
-					</p>
-					<h1 className="text-3xl font-bold tracking-tight text-slate-900">
-						Create student account
-					</h1>
-					<p className="text-sm text-slate-600">
-						Select faculty first, then choose a department and complete registration.
+		<div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#e9ebf2] px-4 py-10 sm:px-6">
+			{/* Decorative background accents — matches login page, desktop only */}
+			<div className="pointer-events-none absolute inset-0 hidden lg:block">
+				<div className="absolute -left-24 top-0 h-[120%] w-[40%] rotate-[-3deg] bg-gradient-to-br from-[#27b8d2] to-[#1a93a8]" />
+				<div className="absolute left-0 top-0 h-full w-[28%] bg-[#27b8d2]/95" />
+			</div>
+			<div className="pointer-events-none absolute inset-x-0 top-0 hidden h-2 bg-gradient-to-r from-[#27b8d2] via-[#17365d] to-[#27b8d2] sm:block lg:hidden" />
+
+			{/* Card */}
+			<div className="relative z-10 w-full max-w-[640px] overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_-15px_rgba(23,54,93,0.25)] ring-1 ring-black/5">
+				<div className="h-2 w-full bg-gradient-to-r from-[#27b8d2] to-[#17365d]" />
+
+				<div className="px-6 py-10 sm:px-10 sm:py-12">
+					{/* Logo + Title */}
+					<div className="mb-9 flex flex-col items-center text-center">
+						<div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-[#e9ebf2] ring-1 ring-[#27b8d2]/20">
+							<Image
+								src="/images/smartbursery-logo.png"
+								alt="SmartBursery Logo"
+								width={64}
+								height={64}
+								className="h-auto w-auto object-contain"
+								priority
+							/>
+						</div>
+
+						<h1 className="text-[22px] font-extrabold leading-tight tracking-wide text-[#17365d] sm:text-[26px]">
+							CREATE STUDENT ACCOUNT
+						</h1>
+						<p className="mt-2 text-sm text-slate-500">
+							Select faculty first, then choose a department and complete registration
+						</p>
+					</div>
+
+					{/* Form */}
+					<form onSubmit={onSubmit} className="grid gap-5 sm:grid-cols-2">
+						<label className="block sm:col-span-1">
+							<span className="mb-2 block text-[14px] font-semibold text-[#17365d]">
+								Register ID
+							</span>
+							<input
+								required
+								value={form.registerId}
+								onChange={(event) =>
+									setForm((prev) => ({ ...prev, registerId: event.target.value }))
+								}
+								className="h-[52px] w-full rounded-xl border-2 border-[#d7dce6] bg-[#f8f9fb] px-4 text-[15px] text-[#17365d] outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
+								placeholder="2021ICT001"
+							/>
+						</label>
+
+						<label className="block sm:col-span-1">
+							<span className="mb-2 block text-[14px] font-semibold text-[#17365d]">
+								Full name
+							</span>
+							<input
+								required
+								value={form.name}
+								onChange={(event) =>
+									setForm((prev) => ({ ...prev, name: event.target.value }))
+								}
+								className="h-[52px] w-full rounded-xl border-2 border-[#d7dce6] bg-[#f8f9fb] px-4 text-[15px] text-[#17365d] outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
+								placeholder="Binoj Madhuranga"
+							/>
+						</label>
+
+						<label className="block sm:col-span-1">
+							<span className="mb-2 block text-[14px] font-semibold text-[#17365d]">
+								Email
+							</span>
+							<input
+								required
+								type="email"
+								value={form.email}
+								onChange={(event) =>
+									setForm((prev) => ({ ...prev, email: event.target.value }))
+								}
+								className="h-[52px] w-full rounded-xl border-2 border-[#d7dce6] bg-[#f8f9fb] px-4 text-[15px] text-[#17365d] outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
+								placeholder="binoj@student.com"
+								autoComplete="email"
+							/>
+						</label>
+
+						<label className="block sm:col-span-1">
+							<span className="mb-2 block text-[14px] font-semibold text-[#17365d]">
+								Phone number
+							</span>
+							<input
+								required
+								value={form.phone}
+								onChange={(event) =>
+									setForm((prev) => ({ ...prev, phone: event.target.value }))
+								}
+								className="h-[52px] w-full rounded-xl border-2 border-[#d7dce6] bg-[#f8f9fb] px-4 text-[15px] text-[#17365d] outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
+								placeholder="0771234567"
+							/>
+						</label>
+
+						<label className="block sm:col-span-1">
+							<span className="mb-2 block text-[14px] font-semibold text-[#17365d]">
+								Password
+							</span>
+							<div className="relative">
+								<input
+									required
+									type={showPassword ? "text" : "password"}
+									minLength={8}
+									value={form.password}
+									onChange={(event) =>
+										setForm((prev) => ({ ...prev, password: event.target.value }))
+									}
+									className="h-[52px] w-full rounded-xl border-2 border-[#d7dce6] bg-[#f8f9fb] px-4 pr-12 text-[15px] text-[#17365d] outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
+									placeholder="At least 8 characters"
+									autoComplete="new-password"
+								/>
+								<button
+									type="button"
+									onClick={() => setShowPassword((prev) => !prev)}
+									className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 transition hover:text-[#27b8d2]"
+									aria-label={showPassword ? "Hide password" : "Show password"}
+									tabIndex={-1}
+								>
+									{showPassword ? (
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+											<path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+											<path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+											<line x1="2" x2="22" y1="2" y2="22" />
+										</svg>
+									) : (
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+											<circle cx="12" cy="12" r="3" />
+										</svg>
+									)}
+								</button>
+							</div>
+						</label>
+
+						<label className="block sm:col-span-1">
+							<span className="mb-2 block text-[14px] font-semibold text-[#17365d]">
+								Faculty
+							</span>
+							<select
+								required
+								value={form.facultyId}
+								onChange={(event) =>
+									setForm((prev) => ({
+										...prev,
+										facultyId: event.target.value,
+										departmentId: "",
+									}))
+								}
+								className="h-[52px] w-full rounded-xl border-2 border-[#d7dce6] bg-[#f8f9fb] px-4 text-[15px] text-[#17365d] outline-none transition focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
+							>
+								<option value="">Select faculty</option>
+								{faculties.map((faculty) => (
+									<option key={faculty.id} value={faculty.id}>
+										{faculty.name} ({faculty.code})
+									</option>
+								))}
+							</select>
+						</label>
+
+						<label className="block sm:col-span-2">
+							<span className="mb-2 block text-[14px] font-semibold text-[#17365d]">
+								Department
+							</span>
+							<select
+								required
+								disabled={!form.facultyId}
+								value={form.departmentId}
+								onChange={(event) =>
+									setForm((prev) => ({ ...prev, departmentId: event.target.value }))
+								}
+								className="h-[52px] w-full rounded-xl border-2 border-[#d7dce6] bg-[#f8f9fb] px-4 text-[15px] text-[#17365d] outline-none transition focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+							>
+								<option value="">
+									{form.facultyId
+										? "Select department"
+										: "Select faculty first"}
+								</option>
+								{availableDepartments.map((department) => (
+									<option key={department.id} value={department.id}>
+										{department.name}
+									</option>
+								))}
+							</select>
+						</label>
+
+						{error ? (
+							<p className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 sm:col-span-2">
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 flex-shrink-0">
+									<circle cx="12" cy="12" r="10" />
+									<line x1="12" x2="12" y1="8" y2="12" />
+									<line x1="12" x2="12.01" y1="16" y2="16" />
+								</svg>
+								<span>{error}</span>
+							</p>
+						) : null}
+
+						{message ? (
+							<p className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 sm:col-span-2">
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 flex-shrink-0">
+									<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+									<polyline points="22 4 12 14.01 9 11.01" />
+								</svg>
+								<span>{message}</span>
+							</p>
+						) : null}
+
+						<button
+							type="submit"
+							disabled={isSubmitting}
+							className="flex h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-[#27b8d2] text-[16px] font-semibold text-white shadow-md transition-all hover:bg-[#1ca9c3] hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:col-span-2"
+						>
+							{isSubmitting ? (
+								<>
+									<svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+										<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+										<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4Z" />
+									</svg>
+									Registering...
+								</>
+							) : (
+								"Register student"
+							)}
+						</button>
+					</form>
+
+					<p className="mt-8 text-center text-xs text-slate-400">
+						© {new Date().getFullYear()} Sabaragamuwa University of Sri Lanka — Bursary Management System
 					</p>
 				</div>
-
-				<form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
-					<label className="space-y-2 sm:col-span-1">
-						<span className="text-sm font-medium text-slate-700">Register ID</span>
-						<input
-							required
-							value={form.registerId}
-							onChange={(event) =>
-								setForm((prev) => ({ ...prev, registerId: event.target.value }))
-							}
-							className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-500"
-							placeholder="2021ICT001"
-						/>
-					</label>
-
-					<label className="space-y-2 sm:col-span-1">
-						<span className="text-sm font-medium text-slate-700">Full name</span>
-						<input
-							required
-							value={form.name}
-							onChange={(event) =>
-								setForm((prev) => ({ ...prev, name: event.target.value }))
-							}
-							className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-500"
-							placeholder="Binoj Madhuranga"
-						/>
-					</label>
-
-					<label className="space-y-2 sm:col-span-1">
-						<span className="text-sm font-medium text-slate-700">Email</span>
-						<input
-							required
-							type="email"
-							value={form.email}
-							onChange={(event) =>
-								setForm((prev) => ({ ...prev, email: event.target.value }))
-							}
-							className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-500"
-							placeholder="binoj@student.com"
-						/>
-					</label>
-
-					<label className="space-y-2 sm:col-span-1">
-						<span className="text-sm font-medium text-slate-700">Phone number</span>
-						<input
-							required
-							value={form.phone}
-							onChange={(event) =>
-								setForm((prev) => ({ ...prev, phone: event.target.value }))
-							}
-							className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-500"
-							placeholder="0771234567"
-						/>
-					</label>
-
-					<label className="space-y-2 sm:col-span-1">
-						<span className="text-sm font-medium text-slate-700">Password</span>
-						<input
-							required
-							type="password"
-							minLength={8}
-							value={form.password}
-							onChange={(event) =>
-								setForm((prev) => ({ ...prev, password: event.target.value }))
-							}
-							className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-500"
-							placeholder="********"
-						/>
-					</label>
-
-					<label className="space-y-2 sm:col-span-1">
-						<span className="text-sm font-medium text-slate-700">Faculty</span>
-						<select
-							required
-							value={form.facultyId}
-							onChange={(event) =>
-								setForm((prev) => ({
-									...prev,
-									facultyId: event.target.value,
-									departmentId: "",
-								}))
-							}
-							className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-500"
-						>
-							<option value="">Select faculty</option>
-							{faculties.map((faculty) => (
-								<option key={faculty.id} value={faculty.id}>
-									{faculty.name} ({faculty.code})
-								</option>
-							))}
-						</select>
-					</label>
-
-					<label className="space-y-2 sm:col-span-2">
-						<span className="text-sm font-medium text-slate-700">Department</span>
-						<select
-							required
-							disabled={!form.facultyId}
-							value={form.departmentId}
-							onChange={(event) =>
-								setForm((prev) => ({ ...prev, departmentId: event.target.value }))
-							}
-							className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-500 disabled:cursor-not-allowed disabled:bg-slate-100"
-						>
-							<option value="">
-								{form.facultyId
-									? "Select department"
-									: "Select faculty first"}
-							</option>
-							{availableDepartments.map((department) => (
-								<option key={department.id} value={department.id}>
-									{department.name}
-								</option>
-							))}
-						</select>
-					</label>
-
-					{error ? (
-						<p className="sm:col-span-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-							{error}
-						</p>
-					) : null}
-
-					{message ? (
-						<p className="sm:col-span-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-							{message}
-						</p>
-					) : null}
-
-					<button
-						type="submit"
-						disabled={isSubmitting}
-						className="sm:col-span-2 inline-flex justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
-					>
-						{isSubmitting ? "Registering..." : "Register student"}
-					</button>
-				</form>
 			</div>
 		</div>
 	);
