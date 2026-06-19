@@ -11,6 +11,7 @@ export default function DepartmentCard({
 }: Props) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className="
         w-full
