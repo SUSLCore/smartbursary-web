@@ -90,9 +90,9 @@ export const facultyMAService = {
     return response.data;
   },
 
-  async getDepartmentStudents(departmentId: number) {
+  async getDepartmentStudents(departmentId: number, batchId: number) {
     const response = await axiosInstance.get<DepartmentStudentsResponse>(
-      `/api/eligible-students/department/${departmentId}`
+      `/api/eligible-students/department/${departmentId}/batch/${batchId}`
     );
 
     return response.data;
