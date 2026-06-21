@@ -34,15 +34,13 @@ export default function Navbar() {
 		<header className="sticky top-0 z-50 w-full bg-gradient-to-r from-[#17365d] via-[#1c3f6b] to-[#17365d] shadow-md shadow-[#17365d]/20">
 			<nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
 				<Link href="/" className="group flex items-center gap-3">
-					<span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-md ring-2 ring-[#27b8d2]/40 transition-all duration-200 group-hover:scale-105 group-hover:ring-[#27b8d2]">
+					<span className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white">
 						<Image
-							src="/favicon.ico"
-							alt="SmartBursery logo"
-							width={28}
-							height={28}
-							priority
-							className="rounded-lg"
-						/>
+  src="/images/smartbursery-logo.png"
+  alt="SmartBursery logo"
+  fill
+  className="object-contain p-1"
+/>
 					</span>
 					<div className="leading-tight">
 						<p className="text-lg font-semibold tracking-wide text-white sm:text-xl">
