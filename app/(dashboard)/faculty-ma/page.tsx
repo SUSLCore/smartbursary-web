@@ -2,20 +2,20 @@ import Link from "next/link";
 
 const features = [
   {
-    title: "Upload bursary available list",
-    description:
-      "Manage the yearly bursary availability flow by department and separate batch. Start with a department, then choose the batch and upload the list.",
-    href: "/faculty-ma/upload-bursary-list",
-    accent: "from-emerald-500 to-teal-500",
-    meta: "Yearly by department and batch",
-  },
-  {
     title: "Monthly request approve list",
     description:
       "Handle the monthly attendance-sheet request workflow for SAR and upload the approval list using the provided sample file format.",
     href: "/faculty-ma/monthly-request-approval",
     accent: "from-slate-900 to-slate-700",
     meta: "Monthly SAR request workflow",
+  },
+  {
+    title: "Upload bursary available list",
+    description:
+      "Manage the yearly bursary availability flow by department and separate batch. Start with a department, then choose the batch and upload the list.",
+    href: "/faculty-ma/upload-bursary-list",
+    accent: "from-emerald-500 to-teal-500",
+    meta: "Yearly by department and batch",
   },
 ];
 
@@ -46,7 +46,7 @@ export default function FacultyMADashboard() {
                   Workflow 1
                 </p>
                 <p className="mt-2 text-sm font-semibold">
-                  Yearly bursary list upload
+                  Monthly SAR approval list
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
@@ -54,7 +54,7 @@ export default function FacultyMADashboard() {
                   Workflow 2
                 </p>
                 <p className="mt-2 text-sm font-semibold">
-                  Monthly SAR approval list
+                  Yearly bursary list upload
                 </p>
               </div>
             </div>
