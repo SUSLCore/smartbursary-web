@@ -23,6 +23,34 @@ function getErrorMessage(error: unknown, fallback: string) {
   return apiError?.response?.data?.message ?? fallback;
 }
 
+function ArrowLeftIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+      <path
+        d="M11 5 5 12l6 7M5 12h14"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
+      <path
+        d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function BatchesPage() {
   const router = useRouter();
   const [batches, setBatches] = useState<Batch[]>([]);
@@ -119,10 +147,14 @@ export default function BatchesPage() {
   };
 
   return (
-    <div className="space-y-8 p-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="min-h-screen space-y-8 bg-[#e9ebf2] p-6 sm:p-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Batches</h1>
+          <span className="inline-flex items-center gap-2 rounded-full bg-[#27b8d2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#27b8d2]" />
+            Setup First
+          </span>
+          <h1 className="mt-3 text-3xl font-bold text-[#17365d]">Batches</h1>
           <p className="mt-2 text-sm text-slate-600">
             Create academic batches, review the active list, and remove batches when needed.
           </p>
@@ -130,29 +162,33 @@ export default function BatchesPage() {
 
         <button
           onClick={() => router.push("/admin")}
-          className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-slate-50"
+          className="inline-flex items-center gap-2 self-start rounded-full border border-[#17365d]/15 bg-white px-4 py-2 text-sm font-medium text-[#17365d] shadow-sm transition-all duration-200 hover:border-[#27b8d2]/50 hover:bg-[#27b8d2]/5"
         >
+          <ArrowLeftIcon />
           Back to admin
         </button>
       </div>
 
       <section className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-900">
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm shadow-slate-200/50">
+          <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#27b8d2] to-[#17365d]" />
+
+          <h2 className="text-xl font-semibold text-[#17365d]">
             Create batch
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Add a new batch name such as <span className="font-medium">21/22</span>.
+            Add a new batch name such as{" "}
+            <span className="font-semibold text-[#27b8d2]">21/22</span>.
           </p>
 
           <form onSubmit={handleCreateBatch} className="mt-6 space-y-4">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-[#17365d]">
               Batch name
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="21/22"
-                className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-slate-900"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:ring-2 focus:ring-[#27b8d2]/20"
                 required
               />
             </label>
@@ -160,7 +196,7 @@ export default function BatchesPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-xl bg-[#27b8d2] px-4 py-3 font-semibold text-[#17365d] shadow-md shadow-[#27b8d2]/30 transition-all duration-200 hover:bg-[#17365d] hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
             >
               {submitting ? "Creating..." : "Create batch"}
             </button>
@@ -179,10 +215,12 @@ export default function BatchesPage() {
           )}
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm shadow-slate-200/50">
+          <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#17365d] to-[#27b8d2]" />
+
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-[#17365d]">
                 Batch list
               </h2>
               <p className="mt-2 text-sm text-slate-600">
@@ -192,11 +230,11 @@ export default function BatchesPage() {
           </div>
 
           {loading ? (
-            <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+            <div className="mt-6 rounded-2xl border border-dashed border-[#27b8d2]/30 bg-[#27b8d2]/5 px-4 py-6 text-sm text-[#17365d]/70">
               Loading batches...
             </div>
           ) : sortedBatches.length === 0 ? (
-            <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+            <div className="mt-6 rounded-2xl border border-dashed border-[#27b8d2]/30 bg-[#27b8d2]/5 px-4 py-6 text-sm text-[#17365d]/70">
               No batches found. Create the first one using the form on the left.
             </div>
           ) : (
@@ -204,11 +242,11 @@ export default function BatchesPage() {
               {sortedBatches.map((batch) => (
                 <div
                   key={batch.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm"
+                  className="group rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/50 p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#27b8d2]/40 hover:bg-white hover:shadow-md hover:shadow-[#27b8d2]/15"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-lg font-semibold text-slate-900">
+                      <p className="text-lg font-semibold text-[#17365d]">
                         {batch.name}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
@@ -220,13 +258,14 @@ export default function BatchesPage() {
                       type="button"
                       onClick={() => handleDeleteBatch(batch.id)}
                       disabled={deletingId === batch.id}
-                      className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-70"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 transition-all duration-200 hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-70"
                     >
+                      <TrashIcon />
                       {deletingId === batch.id ? "Deleting..." : "Delete"}
                     </button>
                   </div>
 
-                  <div className="mt-4 space-y-1 text-xs text-slate-500">
+                  <div className="mt-4 space-y-1 border-t border-slate-200/70 pt-3 text-xs text-slate-500">
                     <p>Created: {new Date(batch.createdAt).toLocaleString()}</p>
                     <p>Updated: {new Date(batch.updatedAt).toLocaleString()}</p>
                   </div>
