@@ -21,9 +21,70 @@ const emptyNotice: NoticeState = null;
 
 const toNumber = (value: string) => {
   const parsed = Number(value);
-
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 };
+
+function ArrowLeftIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+      <path
+        d="M11 5 5 12l6 7M5 12h14"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+      <path
+        d="M6 9l6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function UploadCloudIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
+      <path
+        d="M7 17a4 4 0 0 1-1-7.87A5 5 0 0 1 16.9 8.1 4.5 4.5 0 0 1 16.5 17H7Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 11v7m0-7 2.5 2.5M12 11 9.5 13.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
+      <path
+        d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function UploadBursaryListPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -65,12 +126,15 @@ export default function UploadBursaryListPage() {
   const selectedBatch = batches.find(
     (batch) => String(batch.id) === selectedBatchId
   );
+
   const selectedDepartment = departments.find(
     (department) => String(department.id) === selectedDepartmentId
   );
+
   const finderBatch = batches.find(
     (batch) => String(batch.id) === finderBatchId
   );
+
   const finderDepartment = departments.find(
     (department) => String(department.id) === finderDepartmentId
   );
@@ -97,7 +161,9 @@ export default function UploadBursaryListPage() {
         setStudents(response.data ?? []);
         setStudentNotice({
           tone: "success",
-          text: `Loaded ${response.count ?? response.data?.length ?? 0} eligible students for department ${departmentIdValue} and batch ${batchIdValue}.`,
+          text: `Loaded ${
+            response.count ?? response.data?.length ?? 0
+          } eligible students for department ${departmentIdValue} and batch ${batchIdValue}.`,
         });
       } catch (error) {
         console.error(error);
@@ -125,9 +191,7 @@ export default function UploadBursaryListPage() {
           facultyMAService.getDepartments(),
         ]);
 
-        if (!active) {
-          return;
-        }
+        if (!active) return;
 
         const nextBatches = batchResponse.batches ?? [];
         const nextDepartments = departmentResponse.data ?? [];
@@ -171,9 +235,8 @@ export default function UploadBursaryListPage() {
         });
       } catch (error) {
         console.error(error);
-        if (!active) {
-          return;
-        }
+
+        if (!active) return;
 
         setMetaNotice({
           tone: "error",
@@ -310,6 +373,7 @@ export default function UploadBursaryListPage() {
       setStudents((currentStudents) =>
         currentStudents.filter((student) => student.id !== studentId)
       );
+
       setStudentNotice({
         tone: "success",
         text: response.message,
@@ -327,56 +391,77 @@ export default function UploadBursaryListPage() {
 
   const noticeClassName = (tone: NoticeTone) => {
     if (tone === "error") {
-      return "bg-red-50 text-red-700 ring-1 ring-red-200";
+      return "border-red-200 bg-red-50 text-red-700";
     }
 
     if (tone === "success") {
-      return "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200";
+      return "border-emerald-200 bg-emerald-50 text-emerald-700";
     }
 
-    return "bg-sky-50 text-sky-700 ring-1 ring-sky-200";
+    return "border-[#27b8d2]/30 bg-[#27b8d2]/5 text-[#17365d]";
   };
 
+  const inputClassName =
+    "mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#27b8d2] focus:ring-4 focus:ring-[#27b8d2]/10 disabled:cursor-not-allowed disabled:bg-slate-100";
+
+  const selectClassName = `${inputClassName} appearance-none pr-11`;
+
+  const panelClassName =
+    "relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm shadow-slate-200/50";
+
+  const accentBar = (
+    <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#27b8d2] to-[#17365d]" />
+  );
+
   return (
-    <div className="space-y-8">
-      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="grid gap-0 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-          <div className="p-6 sm:p-8">
-            <span className="inline-flex w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-slate-600">
-              Yearly bursary workflow
-            </span>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+    <div className="space-y-7">
+      <section className={`${panelClassName} sm:p-8`}>
+        {accentBar}
+
+        <div className="flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-2 rounded-full bg-[#27b8d2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#17365d]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#27b8d2]" />
+            Yearly bursary workflow
+          </span>
+
+          <Link
+            href="/faculty-ma"
+            className="inline-flex items-center gap-2 rounded-full border border-[#17365d]/15 bg-white px-4 py-2 text-sm font-medium text-[#17365d] shadow-sm transition-all duration-200 hover:border-[#27b8d2]/50 hover:bg-[#27b8d2]/5"
+          >
+            <ArrowLeftIcon />
+            Back to dashboard
+          </Link>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-[#17365d] sm:text-4xl">
               Upload bursary available list
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-              Upload the yearly bursary availability workbook, inspect department allocations, check a single register ID, and remove entries when the available list changes.
+
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+              Upload eligible student lists, review department records, check
+              eligibility, and manage bursary list changes in one workspace.
             </p>
           </div>
 
-          <div className="border-t border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-700 p-6 text-white lg:border-l lg:border-t-0 sm:p-8">
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-300">
-              Quick status
-            </p>
-            <div className="mt-6 space-y-4">
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
-                  Selected batch
-                </p>
-                <p className="mt-2 text-2xl font-semibold">
-                  {selectedBatch?.name ?? "Not selected"}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
-                  Selected department
-                </p>
-                <p className="mt-2 text-lg font-semibold">
-                  {selectedDepartment?.name ?? "Not selected"}
-                </p>
-                <p className="mt-1 text-sm text-slate-300">
-                  Faculty: {selectedDepartment?.Faculty?.name ?? "Unknown"}
-                </p>
-              </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/50 px-5 py-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Batch
+              </p>
+              <p className="mt-1 text-lg font-semibold text-[#17365d]">
+                {selectedBatch?.name ?? "Not selected"}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/50 px-5 py-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Department
+              </p>
+              <p className="mt-1 text-lg font-semibold text-[#17365d]">
+                {selectedDepartment?.name ?? "Not selected"}
+              </p>
             </div>
           </div>
         </div>
@@ -384,7 +469,7 @@ export default function UploadBursaryListPage() {
 
       {metaNotice && (
         <div
-          className={`rounded-2xl px-4 py-3 text-sm ${noticeClassName(
+          className={`rounded-2xl border px-4 py-3 text-sm font-medium ${noticeClassName(
             metaNotice.tone
           )}`}
         >
@@ -392,92 +477,83 @@ export default function UploadBursaryListPage() {
         </div>
       )}
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-        <div className="space-y-6">
-          <form
-            onSubmit={handleUpload}
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-          >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <form onSubmit={handleUpload} className={`${panelClassName} sm:p-8`}>
+        {accentBar}
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-slate-900">
-                  Upload bursary available list
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#27b8d2]">
+                  Step 1
+                </span>
+                <h2 className="mt-1 text-xl font-semibold text-[#17365d]">
+                  Upload eligible list
                 </h2>
-                <p className="mt-2 text-sm text-slate-600">
-                  The batch and department are loaded from the backend. Pick the registered values and upload the Excel file.
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Choose the correct batch and department, then upload the
+                  Excel file using the required bursary format.
                 </p>
               </div>
 
-              <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
-                Template format: xlsx / xls / csv
-              </div>
+              <span className="inline-flex w-fit items-center rounded-full border border-[#27b8d2]/30 bg-[#27b8d2]/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d]">
+                XLSX / XLS / CSV
+              </span>
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-[#17365d]">
                 Batch
-                <select
-                  value={selectedBatchId}
-                  onChange={(event) => setSelectedBatchId(event.target.value)}
-                  disabled={loadingMeta || batches.length === 0}
-                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 disabled:bg-slate-100"
-                >
-                  <option value="">Select a batch</option>
-                  {batches.map((batch) => (
-                    <option key={batch.id} value={batch.id}>
-                      {batch.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative mt-2">
+                  <select
+                    value={selectedBatchId}
+                    onChange={(event) => setSelectedBatchId(event.target.value)}
+                    disabled={loadingMeta || batches.length === 0}
+                    className={selectClassName}
+                  >
+                    <option value="">Select a batch</option>
+                    {batches.map((batch) => (
+                      <option key={batch.id} value={batch.id}>
+                        {batch.name}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                    <ChevronDownIcon />
+                  </span>
+                </div>
               </label>
 
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-[#17365d]">
                 Department
-                <select
-                  value={selectedDepartmentId}
-                  onChange={(event) => setSelectedDepartmentId(event.target.value)}
-                  disabled={loadingMeta || departments.length === 0}
-                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 disabled:bg-slate-100"
-                >
-                  <option value="">Select a department</option>
-                  {departments.map((department) => (
-                    <option key={department.id} value={department.id}>
-                      {department.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative mt-2">
+                  <select
+                    value={selectedDepartmentId}
+                    onChange={(event) =>
+                      setSelectedDepartmentId(event.target.value)
+                    }
+                    disabled={loadingMeta || departments.length === 0}
+                    className={selectClassName}
+                  >
+                    <option value="">Select a department</option>
+                    {departments.map((department) => (
+                      <option key={department.id} value={department.id}>
+                        {department.name}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                    <ChevronDownIcon />
+                  </span>
+                </div>
               </label>
             </div>
 
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                  Faculty
-                </p>
-                <p className="mt-1 text-base font-semibold text-slate-900">
-                  {selectedDepartment?.Faculty?.name ?? "Select a department"}
-                </p>
-                <p className="mt-1 text-sm text-slate-600">
-                  Faculty ID: {selectedDepartment?.facultyId ?? "-"}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                  Registered IDs
-                </p>
-                <p className="mt-1 text-base font-semibold text-slate-900">
-                  Batch {selectedBatch?.name ?? "-"}
-                </p>
-                <p className="mt-1 text-sm text-slate-600">
-                  Department {selectedDepartment?.name ?? "-"}
-                </p>
-              </div>
-            </div>
-
-            <label className="mt-6 block text-sm font-medium text-slate-700">
+            <label className="mt-6 block text-sm font-medium text-[#17365d]">
               Excel file
-              <div className="mt-2 rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 transition hover:border-slate-400 hover:bg-slate-100">
+              <div className="mt-2 rounded-3xl border-2 border-dashed border-[#27b8d2]/30 bg-[#27b8d2]/5 p-6 text-center transition-all duration-200 hover:border-[#27b8d2]/60 hover:bg-[#27b8d2]/10">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#27b8d2] shadow-sm">
+                  <UploadCloudIcon />
+                </div>
+
                 <input
                   type="file"
                   accept=".xlsx,.xls,.csv"
@@ -485,28 +561,33 @@ export default function UploadBursaryListPage() {
                     setFile(event.target.files?.[0] ?? null);
                     setUploadNotice(emptyNotice);
                   }}
-                  className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-slate-800"
+                  className="mt-4 block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-[#27b8d2] file:px-5 file:py-2.5 file:text-sm file:font-semibold file:text-[#17365d] file:transition-colors file:duration-200 hover:file:bg-[#17365d] hover:file:text-white"
                 />
+
+                <p className="mt-3 text-xs leading-5 text-slate-500">
+                  Accepted formats: XLSX, XLS, or CSV.
+                </p>
               </div>
             </label>
 
             {file && (
-              <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700 ring-1 ring-slate-200">
-                Selected file: <span className="font-semibold">{file.name}</span>
+              <div className="mt-4 rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/40 px-4 py-3 text-sm text-slate-700">
+                Selected file:{" "}
+                <span className="font-semibold text-[#17365d]">{file.name}</span>
               </div>
             )}
 
             <button
               type="submit"
               disabled={uploading || loadingMeta}
-              className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-[#27b8d2] px-5 py-3.5 font-semibold text-[#17365d] shadow-md shadow-[#27b8d2]/30 transition-all duration-200 hover:bg-[#17365d] hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
             >
               {uploading ? "Uploading..." : "Upload bursary available list"}
             </button>
 
             {uploadNotice && (
               <div
-                className={`mt-4 rounded-2xl px-4 py-3 text-sm ${noticeClassName(
+                className={`mt-4 rounded-2xl border px-4 py-3 text-sm font-medium ${noticeClassName(
                   uploadNotice.tone
                 )}`}
               >
@@ -516,114 +597,130 @@ export default function UploadBursaryListPage() {
 
             {uploadStats && (
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Batch
-                  </p>
-                  <p className="mt-1 text-lg font-semibold text-slate-900">
-                    {uploadStats.batchId}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Department
-                  </p>
-                  <p className="mt-1 text-lg font-semibold text-slate-900">
-                    {uploadStats.departmentId}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Students
-                  </p>
-                  <p className="mt-1 text-lg font-semibold text-slate-900">
-                    {uploadStats.totalStudents}
-                  </p>
-                </div>
+                {[
+                  ["Batch", uploadStats.batchId],
+                  ["Department", uploadStats.departmentId],
+                  ["Students", uploadStats.totalStudents],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="rounded-2xl border border-slate-200/70 bg-white px-4 py-3"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      {label}
+                    </p>
+                    <p className="mt-1 text-xl font-semibold text-[#17365d]">
+                      {value}
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
-          </form>
+      </form>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900">
-                  Find department students
-                </h2>
+      <div className="flex items-center gap-2 px-1">
+        <span className="h-1.5 w-1.5 rounded-full bg-[#27b8d2]" />
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+          Step 2 · Review & manage
+        </p>
+      </div>
+
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">
+        <section className={panelClassName}>
+          {accentBar}
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-[#17365d]">
+                Department students
+              </h2>
                 <p className="mt-2 text-sm text-slate-600">
-                  Use a separate department and batch selection to load the eligible student list.
+                  Pick any batch and department to browse its eligible
+                  list — this can be different from the one uploaded above.
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={handleLoadStudents}
-                disabled={loadingStudents || !finderDepartmentId || !finderBatchId}
-                className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+                disabled={
+                  loadingStudents || !finderDepartmentId || !finderBatchId
+                }
+                className="rounded-2xl bg-[#17365d] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#0f2742] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loadingStudents ? "Loading..." : "Load students"}
               </button>
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-[#17365d]">
                 Batch
-                <select
-                  value={finderBatchId}
-                  onChange={(event) => {
-                    setFinderBatchId(event.target.value);
-                    setStudents([]);
-                    setStudentNotice(emptyNotice);
-                  }}
-                  disabled={loadingMeta || batches.length === 0}
-                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 disabled:bg-slate-100"
-                >
-                  <option value="">Select a batch</option>
-                  {batches.map((batch) => (
-                    <option key={batch.id} value={batch.id}>
-                      {batch.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative mt-2">
+                  <select
+                    value={finderBatchId}
+                    onChange={(event) => {
+                      setFinderBatchId(event.target.value);
+                      setStudents([]);
+                      setStudentNotice(emptyNotice);
+                    }}
+                    disabled={loadingMeta || batches.length === 0}
+                    className={selectClassName}
+                  >
+                    <option value="">Select a batch</option>
+                    {batches.map((batch) => (
+                      <option key={batch.id} value={batch.id}>
+                        {batch.name}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                    <ChevronDownIcon />
+                  </span>
+                </div>
               </label>
 
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-[#17365d]">
                 Department
-                <select
-                  value={finderDepartmentId}
-                  onChange={(event) => {
-                    setFinderDepartmentId(event.target.value);
-                    setStudents([]);
-                    setStudentNotice(emptyNotice);
-                  }}
-                  disabled={loadingMeta || departments.length === 0}
-                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 disabled:bg-slate-100"
-                >
-                  <option value="">Select a department</option>
-                  {departments.map((department) => (
-                    <option key={department.id} value={department.id}>
-                      {department.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative mt-2">
+                  <select
+                    value={finderDepartmentId}
+                    onChange={(event) => {
+                      setFinderDepartmentId(event.target.value);
+                      setStudents([]);
+                      setStudentNotice(emptyNotice);
+                    }}
+                    disabled={loadingMeta || departments.length === 0}
+                    className={selectClassName}
+                  >
+                    <option value="">Select a department</option>
+                    {departments.map((department) => (
+                      <option key={department.id} value={department.id}>
+                        {department.name}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                    <ChevronDownIcon />
+                  </span>
+                </div>
               </label>
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+              <div className="rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/40 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Finder batch
                 </p>
-                <p className="mt-1 text-base font-semibold text-slate-900">
+                <p className="mt-1 font-semibold text-[#17365d]">
                   {finderBatch?.name ?? "Select a batch"}
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+              <div className="rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/40 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Finder department
                 </p>
-                <p className="mt-1 text-base font-semibold text-slate-900">
+                <p className="mt-1 font-semibold text-[#17365d]">
                   {finderDepartment?.name ?? "Select a department"}
                 </p>
               </div>
@@ -631,7 +728,7 @@ export default function UploadBursaryListPage() {
 
             {studentNotice && (
               <div
-                className={`mt-4 rounded-2xl px-4 py-3 text-sm ${noticeClassName(
+                className={`mt-4 rounded-2xl border px-4 py-3 text-sm font-medium ${noticeClassName(
                   studentNotice.tone
                 )}`}
               >
@@ -639,34 +736,39 @@ export default function UploadBursaryListPage() {
               </div>
             )}
 
-            <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200">
+            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/70">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-200 text-sm">
-                  <thead className="bg-slate-50 text-left text-xs uppercase tracking-[0.18em] text-slate-500">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-[#17365d] text-left text-xs uppercase tracking-[0.16em] text-white">
                     <tr>
-                      <th className="px-4 py-3 font-semibold">Register ID</th>
-                      <th className="px-4 py-3 font-semibold">Student</th>
-                      <th className="px-4 py-3 font-semibold">Account</th>
-                      <th className="px-4 py-3 font-semibold">Amount</th>
-                      <th className="px-4 py-3 font-semibold text-right">
+                      <th className="px-4 py-4 font-semibold">Register ID</th>
+                      <th className="px-4 py-4 font-semibold">Student</th>
+                      <th className="px-4 py-4 font-semibold">Account</th>
+                      <th className="px-4 py-4 font-semibold">Amount</th>
+                      <th className="px-4 py-4 text-right font-semibold">
                         Action
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 bg-white">
+
+                  <tbody className="divide-y divide-slate-100 bg-white">
                     {students.length === 0 ? (
                       <tr>
                         <td
                           colSpan={5}
-                          className="px-4 py-8 text-center text-sm text-slate-500"
+                          className="px-4 py-10 text-center text-sm text-slate-500"
                         >
-                          No students loaded yet. Select a batch and department, then click Load students.
+                          No students loaded yet. Select a batch and department,
+                          then click Load students.
                         </td>
                       </tr>
                     ) : (
                       students.map((student) => (
-                        <tr key={student.id} className="align-top">
-                          <td className="px-4 py-4 font-medium text-slate-900">
+                        <tr
+                          key={student.id}
+                          className="transition-colors duration-150 hover:bg-[#27b8d2]/5"
+                        >
+                          <td className="px-4 py-4 font-semibold text-[#17365d]">
                             {student.registerId}
                           </td>
                           <td className="px-4 py-4 text-slate-700">
@@ -675,7 +777,7 @@ export default function UploadBursaryListPage() {
                           <td className="px-4 py-4 text-slate-600">
                             {student.accountNumber ?? "-"}
                           </td>
-                          <td className="px-4 py-4 text-slate-600">
+                          <td className="px-4 py-4 font-medium text-slate-700">
                             {student.amount ?? "-"}
                           </td>
                           <td className="px-4 py-4 text-right">
@@ -683,8 +785,9 @@ export default function UploadBursaryListPage() {
                               type="button"
                               onClick={() => handleRemoveStudent(student.id)}
                               disabled={removingId === student.id}
-                              className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-70"
+                              className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-red-600 transition-all duration-200 hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-70"
                             >
+                              <TrashIcon />
                               {removingId === student.id
                                 ? "Removing..."
                                 : "Remove"}
@@ -697,34 +800,37 @@ export default function UploadBursaryListPage() {
                 </table>
               </div>
             </div>
-          </section>
-        </div>
+        </section>
 
         <aside className="space-y-6">
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900">
+          <section className={panelClassName}>
+            {accentBar}
+
+            <h2 className="text-xl font-semibold text-[#17365d]">
               Check eligibility
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              Enter a register ID to verify whether the student is already in the eligible list.
+
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Enter a register ID and verify whether the student is available
+              in the eligible list.
             </p>
 
             <form onSubmit={handleCheckEligibility} className="mt-6 space-y-4">
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-[#17365d]">
                 Register ID
                 <input
                   type="text"
                   value={registerId}
                   onChange={(event) => setRegisterId(event.target.value)}
                   placeholder="21CSE0158"
-                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+                  className={inputClassName}
                 />
               </label>
 
               <button
                 type="submit"
                 disabled={checking}
-                className="inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex w-full items-center justify-center rounded-2xl bg-[#27b8d2] px-5 py-3.5 font-semibold text-[#17365d] shadow-md shadow-[#27b8d2]/30 transition-all duration-200 hover:bg-[#17365d] hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {checking ? "Checking..." : "Check eligibility"}
               </button>
@@ -732,7 +838,7 @@ export default function UploadBursaryListPage() {
 
             {eligibilityNotice && (
               <div
-                className={`mt-4 rounded-2xl px-4 py-3 text-sm ${noticeClassName(
+                className={`mt-4 rounded-2xl border px-4 py-3 text-sm font-medium ${noticeClassName(
                   eligibilityNotice.tone
                 )}`}
               >
@@ -741,11 +847,11 @@ export default function UploadBursaryListPage() {
             )}
 
             {eligibilityResult?.student && (
-              <div className="mt-4 rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <div className="mt-4 rounded-2xl border border-[#27b8d2]/20 bg-[#27b8d2]/5 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#27b8d2]">
                   Matched student
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="mt-2 text-lg font-semibold text-[#17365d]">
                   {eligibilityResult.student.studentName}
                 </p>
                 <p className="mt-1 text-sm text-slate-600">
@@ -757,13 +863,6 @@ export default function UploadBursaryListPage() {
               </div>
             )}
           </section>
-
-          <Link
-            href="/faculty-ma"
-            className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-          >
-            Back to dashboard
-          </Link>
         </aside>
       </section>
     </div>
