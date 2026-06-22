@@ -9,6 +9,8 @@ import { clearAuthError } from "@/features/auth/authSlice";
 import { loginUser } from "@/features/auth/authThunk";
 import { AppDispatch, RootState } from "@/redux/store";
 
+import Link from "next/link";
+
 const ROLE_TO_DASHBOARD_PATH: Record<string, string> = {
   ADMIN: "/admin",
   STUDENT_SERVICE_SAR: "/student-service-sar",
@@ -201,6 +203,15 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+          <p className="mt-6 text-center text-sm text-slate-500">
+  Don&apos;t have an account?{" "}
+  <Link
+    href="/register"
+    className="font-semibold text-[#27b8d2] transition hover:text-[#17365d] hover:underline"
+  >
+    Register
+  </Link>
+</p>
 
           <p className="mt-8 text-center text-xs text-slate-400">
             © {new Date().getFullYear()} Sabaragamuwa University of Sri Lanka — Bursary Management System
