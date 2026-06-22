@@ -4,6 +4,7 @@ import Image from "next/image";
 import { FormEvent, useMemo, useState } from "react";
 
 import authService from "@/services/auth.service";
+import Link from "next/link";
 
 type Faculty = {
 	id: number;
@@ -368,6 +369,16 @@ export default function RegisterPage() {
 							)}
 						</button>
 					</form>
+
+					<p className="mt-6 text-center text-sm text-slate-500">
+  Already have an account?{" "}
+  <Link
+    href="/login"
+    className="font-semibold text-[#27b8d2] transition hover:text-[#17365d] hover:underline"
+  >
+    Login
+  </Link>
+</p>
 
 					<p className="mt-8 text-center text-xs text-slate-400">
 						© {new Date().getFullYear()} Sabaragamuwa University of Sri Lanka — Bursary Management System
