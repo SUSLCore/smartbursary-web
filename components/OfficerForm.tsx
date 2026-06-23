@@ -53,18 +53,14 @@ export default function OfficerForm({
     role,
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setLoading(true);
@@ -80,38 +76,23 @@ export default function OfficerForm({
           break;
 
         case "FACULTY_AR":
-          result = await createFacultyAR(
-            facultyId!,
-            form
-          );
+          result = await createFacultyAR(facultyId!, form);
           break;
 
         case "FACULTY_MA":
-          result = await createFacultyMA(
-            facultyId!,
-            form
-          );
+          result = await createFacultyMA(facultyId!, form);
           break;
 
         case "DEPARTMENT_HEAD":
-          result = await createDepartmentHead(
-            departmentId!,
-            form
-          );
+          result = await createDepartmentHead(departmentId!, form);
           break;
 
         case "DEPARTMENT_MA":
-          result = await createDepartmentMA(
-            departmentId!,
-            form
-          );
+          result = await createDepartmentMA(departmentId!, form);
           break;
       }
 
-      setMessage(
-        result?.message ??
-          "Officer account created successfully"
-      );
+      setMessage(result?.message ?? "Officer account created successfully");
 
       setForm({
         registerId: "",
@@ -121,42 +102,42 @@ export default function OfficerForm({
         role,
       });
     } catch (error: unknown) {
-      setError(
-        getErrorMessage(error, "Failed to create account")
-      );
+      setError(getErrorMessage(error, "Failed to create account"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="rounded-xl border bg-white p-6 shadow-sm">
-      <h2 className="mb-4 text-xl font-semibold">
-        {title}
-      </h2>
+    <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:p-7">
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+           
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#17365d]">
+            {title}
+          </h2>
+        </div>
+      </div>
 
       {message && (
-        <div className="mb-4 rounded bg-green-100 p-3 text-green-700">
+        <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
           {message}
         </div>
       )}
 
       {error && (
-        <div className="mb-4 rounded bg-red-100 p-3 text-red-700">
+        <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
           {error}
         </div>
       )}
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
           name="registerId"
           placeholder="Register ID"
           value={form.registerId}
           onChange={handleChange}
-          className="w-full rounded border p-3"
+          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
           required
         />
 
@@ -165,7 +146,7 @@ export default function OfficerForm({
           placeholder="Name"
           value={form.name}
           onChange={handleChange}
-          className="w-full rounded border p-3"
+          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
           required
         />
 
@@ -175,7 +156,7 @@ export default function OfficerForm({
           placeholder="Email"
           value={form.email}
           onChange={handleChange}
-          className="w-full rounded border p-3"
+          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
           required
         />
 
@@ -185,14 +166,17 @@ export default function OfficerForm({
           placeholder="Temporary Password"
           value={form.password}
           onChange={handleChange}
-          className="w-full rounded border p-3"
+          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
           required
         />
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded bg-blue-600 p-3 font-semibold text-white"
+          style={{
+            backgroundImage: "linear-gradient(90deg, #17365d 0%, #27b8d2 100%)",
+          }}
+          className="inline-flex cursor-pointer w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#17365d]/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#27b8d2]/25 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Creating..." : "Create Account"}
         </button>

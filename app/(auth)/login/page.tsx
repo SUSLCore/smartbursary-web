@@ -15,13 +15,10 @@ const ROLE_TO_DASHBOARD_PATH: Record<string, string> = {
   ADMIN: "/admin",
   STUDENT_SERVICE_SAR: "/student-service-sar",
 
-
   STUDENT: "/student",
 
   FACULTY_AR: "/faculty-ar",
   FACULTY_MA: "/faculty-ma",
-
-
 
   DEPARTMENT_HEAD: "/department-head",
   DEPARTMENT_MA: "/department-ma",
@@ -37,7 +34,7 @@ export default function LoginPage() {
   const dispatch = useDispatch<AppDispatch>();
 
   const { status, error, role, isAuthenticated } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
   const [email, setEmail] = useState("");
@@ -46,7 +43,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const isLoading = status === "loading";
-  const formError = useMemo(() => localError || error || "", [error, localError]);
+  const formError = useMemo(
+    () => localError || error || "",
+    [error, localError],
+  );
 
   useEffect(() => {
     if (isAuthenticated && role) {
@@ -83,15 +83,15 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#e9ebf2] px-4 py-10 sm:px-6">
       {/* Decorative background accents (hidden on small screens to avoid clutter) */}
       <div className="pointer-events-none absolute inset-0 hidden lg:block">
-        <div className="absolute -left-24 top-0 h-[120%] w-[40%] rotate-[-3deg] bg-gradient-to-br from-[#27b8d2] to-[#1a93a8]" />
+        <div className="absolute -left-24 top-0 h-[120%] w-[40%] -rotate-3 bg-linear-to-br from-[#27b8d2] to-[#1a93a8]" />
         <div className="absolute left-0 top-0 h-full w-[28%] bg-[#27b8d2]/95" />
       </div>
-      <div className="pointer-events-none absolute inset-x-0 top-0 hidden h-2 bg-gradient-to-r from-[#27b8d2] via-[#17365d] to-[#27b8d2] sm:block lg:hidden" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 hidden h-2 bg-linear-to-r from-[#27b8d2] via-[#17365d] to-[#27b8d2] sm:block lg:hidden" />
 
       {/* Card */}
-      <div className="relative z-10 w-full max-w-[440px] overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_-15px_rgba(23,54,93,0.25)] ring-1 ring-black/5">
+      <div className="relative z-10 w-full max-w-110 overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_-15px_rgba(23,54,93,0.25)] ring-1 ring-black/5">
         {/* Card top accent bar */}
-        <div className="h-2 w-full bg-gradient-to-r from-[#27b8d2] to-[#17365d]" />
+        <div className="h-2 w-full bg-linear-to-r from-[#27b8d2] to-[#17365d]" />
 
         <div className="px-6 py-10 sm:px-10 sm:py-12">
           {/* Logo + Title */}
@@ -128,7 +128,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="h-[52px] w-full rounded-xl border-2 border-[#d7dce6] bg-[#f8f9fb] px-4 text-[15px] text-[#17365d] outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
+                className="h-13 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-[15px] text-[#17365d] outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/10"
                 placeholder="you@example.com"
                 autoComplete="email"
               />
@@ -144,7 +144,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="h-[52px] w-full rounded-xl border-2 border-[#d7dce6] bg-[#f8f9fb] px-4 pr-12 text-[15px] text-[#17365d] outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/15"
+                  className="h-13 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 pr-12 text-[15px] text-[#17365d] outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/10"
                   placeholder="Enter your password"
                   autoComplete="current-password"
                 />
@@ -156,14 +156,32 @@ export default function LoginPage() {
                   tabIndex={-1}
                 >
                   {showPassword ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
                       <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
                       <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
                       <line x1="2" x2="22" y1="2" y2="22" />
                     </svg>
                   ) : (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                       <circle cx="12" cy="12" r="3" />
                     </svg>
@@ -174,7 +192,15 @@ export default function LoginPage() {
 
             {formError ? (
               <p className="mb-5 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 flex-shrink-0">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="mt-0.5 shrink-0"
+                >
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" x2="12" y1="8" y2="12" />
                   <line x1="12" x2="12.01" y1="16" y2="16" />
@@ -188,13 +214,32 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-[#27b8d2] text-[16px] font-semibold text-white shadow-md transition-all hover:bg-[#1ca9c3] hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+              className="flex h-13 w-full items-center justify-center gap-2 rounded-2xl text-[16px] font-semibold text-white shadow-lg shadow-[#27b8d2]/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#27b8d2]/40 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, #27b8d2 0%, #1a93a8 100%)",
+              }}
             >
               {isLoading ? (
                 <>
-                  <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4Z" />
+                  <svg
+                    className="h-5 w-5 animate-spin"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4Z"
+                    />
                   </svg>
                   Signing In...
                 </>
@@ -204,17 +249,18 @@ export default function LoginPage() {
             </button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-500">
-  Don&apos;t have an account?{" "}
-  <Link
-    href="/register"
-    className="font-semibold text-[#27b8d2] transition hover:text-[#17365d] hover:underline"
-  >
-    Register
-  </Link>
-</p>
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/register"
+              className="font-semibold text-[#27b8d2] transition hover:text-[#17365d] hover:underline"
+            >
+              Register
+            </Link>
+          </p>
 
           <p className="mt-8 text-center text-xs text-slate-400">
-            © {new Date().getFullYear()} Sabaragamuwa University of Sri Lanka — Bursary Management System
+            © {new Date().getFullYear()} Sabaragamuwa University of Sri Lanka —
+            Bursary Management System
           </p>
         </div>
       </div>
