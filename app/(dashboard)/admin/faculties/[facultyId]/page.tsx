@@ -7,7 +7,7 @@ import OfficerForm from "@/components/OfficerForm";
 import { useParams, useRouter } from "next/navigation";
 
 function getFacultyTitle(facultyId: number) {
-  return `Faculty #${facultyId}`;
+  return `Faculty ${facultyId}`;
 }
 
 export default function FacultyPage() {
