@@ -80,7 +80,7 @@ export default function FacultiesPage() {
             <button
               key={faculty.id}
               onClick={() => router.push(`/admin/faculties/${faculty.id}`)}
-              className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 text-left shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[#27b8d2]/40 hover:shadow-xl hover:shadow-[#27b8d2]/10"
+              className="group relative cursor-pointer overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 text-left shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[#27b8d2]/40 hover:shadow-xl hover:shadow-[#27b8d2]/10"
             >
               <span className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-linear-to-r from-[#27b8d2] to-[#17365d] transition-transform duration-300 group-hover:scale-x-100" />
               <div className="flex items-start gap-4">
