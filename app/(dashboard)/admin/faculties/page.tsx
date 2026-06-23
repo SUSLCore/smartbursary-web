@@ -23,11 +23,6 @@ export default function FacultiesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const getFacultyInitial = (name: string) => {
-    const initial = name.trim().charAt(0).toUpperCase();
-    return initial || "F";
-  };
-
   useEffect(() => {
     const loadFaculties = async () => {
       try {
@@ -45,7 +40,7 @@ export default function FacultiesPage() {
   }, []);
 
   return (
-    <div className="relative space-y-8 overflow-hidden rounded-[2rem] bg-[#edf1f8] p-6 shadow-[0_24px_80px_rgba(15,23,42,0.06)] sm:p-8">
+    <div className="relative space-y-8 overflow-hidden rounded-4xl bg-[#edf1f8] p-6 shadow-[0_24px_80px_rgba(15,23,42,0.06)] sm:p-8">
       <div className="pointer-events-none absolute -left-20 top-0 h-56 w-56 rounded-full bg-[#27b8d2]/10 blur-3xl" />
       <div className="pointer-events-none absolute -right-16 bottom-0 h-64 w-64 rounded-full bg-[#17365d]/10 blur-3xl" />
 
@@ -72,11 +67,11 @@ export default function FacultiesPage() {
       </div>
 
       {loading ? (
-        <div className="rounded-[1.5rem] border border-white/70 bg-white/85 p-6 text-slate-600 shadow-sm backdrop-blur">
+        <div className="rounded-3xl border border-white/70 bg-white/85 p-6 text-slate-600 shadow-sm backdrop-blur">
           Loading faculties...
         </div>
       ) : error ? (
-        <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 p-6 text-rose-700 shadow-sm">
+        <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 text-rose-700 shadow-sm">
           {error}
         </div>
       ) : (
@@ -85,15 +80,34 @@ export default function FacultiesPage() {
             <button
               key={faculty.id}
               onClick={() => router.push(`/admin/faculties/${faculty.id}`)}
-              className="group relative overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white p-6 text-left shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[#27b8d2]/40 hover:shadow-xl hover:shadow-[#27b8d2]/10"
+              className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 text-left shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[#27b8d2]/40 hover:shadow-xl hover:shadow-[#27b8d2]/10"
             >
-              <span className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-[#27b8d2] to-[#17365d] transition-transform duration-300 group-hover:scale-x-100" />
+              <span className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-linear-to-r from-[#27b8d2] to-[#17365d] transition-transform duration-300 group-hover:scale-x-100" />
               <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#27b8d2]/10 text-sm font-bold text-[#17365d] transition-colors duration-300 group-hover:bg-[#27b8d2] group-hover:text-white">
-                  {getFacultyInitial(faculty.name)}
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#27b8d2]/10 text-[#17365d] transition-colors duration-300 group-hover:bg-[#27b8d2] group-hover:text-white">
+                  <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+                    <path
+                      d="M4 20V8.5L12 4l8 4.5V20"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M8 20v-4h3v4M13 20v-4h3v4"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M9 10h.01M12 10h.01M15 10h.01M9 13h.01M12 13h.01M15 13h.01"
+                      stroke="currentColor"
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                    />
+                  </svg>
                 </div>
                 <div className="min-w-0">
-                   
                   <div className="mt-2 text-lg font-semibold text-[#17365d]">
                     {faculty.name}
                   </div>
@@ -110,7 +124,7 @@ export default function FacultiesPage() {
           ))}
 
           {!faculties.length && (
-            <div className="rounded-[1.5rem] border border-white/70 bg-white/85 p-6 text-slate-600 shadow-sm backdrop-blur">
+            <div className="rounded-3xl border border-white/70 bg-white/85 p-6 text-slate-600 shadow-sm backdrop-blur">
               No faculties found.
             </div>
           )}
