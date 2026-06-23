@@ -112,17 +112,11 @@ export default function OfficerForm({
     <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:p-7">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#27b8d2]">
-            Officer form
-          </p>
+           
           <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#17365d]">
             {title}
           </h2>
         </div>
-
-        <span className="rounded-full bg-[#27b8d2]/10 px-3 py-1 text-xs font-semibold text-[#17365d]">
-          {role.replaceAll("_", " ")}
-        </span>
       </div>
 
       {message && (
