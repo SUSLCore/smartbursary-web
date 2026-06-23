@@ -91,13 +91,35 @@ export default function FacultyPage() {
               className="group cursor-pointer rounded-[1.25rem] border border-slate-200/80 bg-white p-5 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#27b8d2]/40 hover:shadow-lg hover:shadow-[#27b8d2]/10"
             >
               <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#17365d]/10 text-sm font-bold text-[#17365d] transition-colors duration-300 group-hover:bg-[#17365d] group-hover:text-white">
-                  {department.name.trim().charAt(0).toUpperCase() || "D"}
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#17365d]/10 text-[#17365d] transition-colors duration-300 group-hover:bg-[#17365d] group-hover:text-white">
+                  <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
+                    <path
+                      d="M3 3h8v8H3V3Z"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M13 3h8v8h-8V3Z"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M3 13h8v8H3v-8Z"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M13 13h8v8h-8v-8Z"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#27b8d2]">
-                    Department
-                  </p>
                   <h3 className="mt-2 text-lg font-semibold text-[#17365d]">
                     {department.name}
                   </h3>
