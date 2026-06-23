@@ -93,9 +93,7 @@ export default function FacultiesPage() {
                   {getFacultyInitial(faculty.name)}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#27b8d2]">
-                    Faculty
-                  </p>
+                   
                   <div className="mt-2 text-lg font-semibold text-[#17365d]">
                     {faculty.name}
                   </div>
