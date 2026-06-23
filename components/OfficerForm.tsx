@@ -182,7 +182,7 @@ export default function OfficerForm({
           style={{
             backgroundImage: "linear-gradient(90deg, #17365d 0%, #27b8d2 100%)",
           }}
-          className="inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#17365d]/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#27b8d2]/25 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex cursor-pointer w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#17365d]/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#27b8d2]/25 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Creating..." : "Create Account"}
         </button>
