@@ -33,6 +33,32 @@ function BuildingIcon() {
   );
 }
 
+function SearchUserIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+      <circle
+        cx="10"
+        cy="10"
+        r="5.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="m14.2 14.2 4.8 4.8"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10 7.5v5M7.5 10h5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function ArrowIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
@@ -60,7 +86,7 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           <button
             onClick={() => router.push("/admin/batches")}
             className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-8 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#27b8d2]/40 hover:shadow-xl hover:shadow-[#27b8d2]/15"
@@ -121,6 +147,28 @@ export default function AdminDashboard() {
             </h2>
             <p className="mt-2 text-sm text-slate-600">
               Manage faculty officers and department setup.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#17365d] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              Open <ArrowIcon />
+            </span>
+          </button>
+
+          <button
+            onClick={() => router.push("/admin/manage-user")}
+            className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-8 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#27b8d2]/40 hover:shadow-xl hover:shadow-[#27b8d2]/15"
+          >
+            <span className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-[#27b8d2] to-[#17365d] transition-transform duration-300 group-hover:scale-x-100" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#27b8d2]/10 text-[#27b8d2] transition-colors duration-300 group-hover:bg-[#27b8d2] group-hover:text-white">
+              <SearchUserIcon />
+            </div>
+            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#27b8d2]">
+              Users
+            </p>
+            <h2 className="mt-2 text-xl font-semibold text-[#17365d]">
+              Manage User
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Search a user quickly by registration ID and review their account details.
             </p>
             <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#17365d] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
               Open <ArrowIcon />
