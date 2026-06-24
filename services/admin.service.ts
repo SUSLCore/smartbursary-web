@@ -1,6 +1,7 @@
 // src/services/admin.service.ts
 
 import axiosInstance from "@/lib/axios";
+import type { AuthUser } from "@/features/auth/authTypes";
 
 /* =========================
    TYPES
@@ -30,6 +31,13 @@ export interface Department {
   facultyId: number;
 }
 
+export interface AdminUserLookupResponse {
+  success?: boolean;
+  message?: string;
+  user?: AuthUser;
+  data?: AuthUser;
+}
+
 /* =========================
    FACULTY APIs
 ========================= */
@@ -47,6 +55,24 @@ export const getDepartmentsByFaculty = async (
   );
 
   return data;
+};
+
+export const getUserByRegisterId = async (
+  registerId: string
+): Promise<AuthUser> => {
+  const { data } = await axiosInstance.get<AdminUserLookupResponse | AuthUser>(
+    `/api/admin/users/${encodeURIComponent(registerId)}`
+  );
+
+  if (data && typeof data === "object" && "user" in data && data.user) {
+    return data.user;
+  }
+
+  if (data && typeof data === "object" && "data" in data && data.data) {
+    return data.data;
+  }
+
+  return data as AuthUser;
 };
 
 /* =========================
@@ -127,6 +153,7 @@ export const createDepartmentMA = async (
 const adminService = {
   getFaculties,
   getDepartmentsByFaculty,
+  getUserByRegisterId,
 
   createSAR,
 
