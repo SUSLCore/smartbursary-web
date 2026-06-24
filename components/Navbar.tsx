@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
+import ConfirmationCard from "@/components/ConfirmationCard";
 import { logoutUser } from "@/features/auth/authThunk";
 import { AppDispatch } from "@/redux/store";
 
@@ -13,6 +14,7 @@ export default function Navbar() {
 	const router = useRouter();
 	const dispatch = useDispatch<AppDispatch>();
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
+	const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
 	const handleLogout = async () => {
 		if (isLoggingOut) {
@@ -61,14 +63,33 @@ export default function Navbar() {
 					</button>
 					<button
 						type="button"
-						onClick={handleLogout}
-						disabled={isLoggingOut}
+						onClick={() => setShowLogoutConfirm(true)}
 						className="rounded-full bg-[#27b8d2] px-5 py-2 text-sm font-semibold text-[#17365d] shadow-md shadow-[#27b8d2]/30 transition-all duration-200 hover:bg-white hover:shadow-lg hover:shadow-[#27b8d2]/40 disabled:cursor-not-allowed disabled:opacity-60"
 					>
-						{isLoggingOut ? "Logging out..." : "Logout"}
+						Logout
 					</button>
 				</div>
 			</nav>
+
+			<ConfirmationCard
+				open={showLogoutConfirm}
+				title="Log out of SmartBursery?"
+				description="You will be signed out of the current session and returned to the login page."
+				confirmText={isLoggingOut ? "Logging out..." : "Yes, log out"}
+				cancelText="Stay signed in"
+				loading={isLoggingOut}
+				onCancel={() => {
+					if (isLoggingOut) {
+						return;
+					}
+
+					setShowLogoutConfirm(false);
+				}}
+				onConfirm={async () => {
+					setShowLogoutConfirm(false);
+					await handleLogout();
+				}}
+			/>
 		</header>
 	);
 }
