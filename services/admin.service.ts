@@ -38,6 +38,11 @@ export interface AdminUserLookupResponse {
   data?: AuthUser;
 }
 
+export interface AdminActionResponse {
+  success?: boolean;
+  message?: string;
+}
+
 /* =========================
    FACULTY APIs
 ========================= */
@@ -73,6 +78,16 @@ export const getUserByRegisterId = async (
   }
 
   return data as AuthUser;
+};
+
+export const deleteUserByRegisterId = async (
+  registerId: string
+): Promise<AdminActionResponse> => {
+  const { data } = await axiosInstance.delete<AdminActionResponse>(
+    `/api/admin/users/${encodeURIComponent(registerId)}`
+  );
+
+  return data;
 };
 
 /* =========================
@@ -154,6 +169,7 @@ const adminService = {
   getFaculties,
   getDepartmentsByFaculty,
   getUserByRegisterId,
+  deleteUserByRegisterId,
 
   createSAR,
 

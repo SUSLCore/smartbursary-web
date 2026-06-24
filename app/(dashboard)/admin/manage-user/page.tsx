@@ -2,8 +2,12 @@
 
 import { useState, type FormEvent } from "react";
 
-import { getUserByRegisterId } from "@/services/admin.service";
+import ConfirmationCard from "@/components/ConfirmationCard";
 import type { AuthUser } from "@/features/auth/authTypes";
+import {
+  deleteUserByRegisterId,
+  getUserByRegisterId,
+} from "@/services/admin.service";
 
 type ApiError = {
   response?: {
@@ -82,6 +86,8 @@ function ShieldIcon() {
 export default function ManageUserPage() {
   const [registerId, setRegisterId] = useState("");
   const [searching, setSearching] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [notice, setNotice] = useState<NoticeState>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
 
@@ -115,6 +121,7 @@ export default function ManageUserPage() {
       setSearching(true);
       setNotice(null);
       setUser(null);
+      setConfirmDeleteOpen(false);
 
       const response = await getUserByRegisterId(trimmedRegisterId);
 
@@ -131,6 +138,34 @@ export default function ManageUserPage() {
       });
     } finally {
       setSearching(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!user) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      const response = await deleteUserByRegisterId(user.registerId);
+
+      setNotice({
+        tone: "success",
+        text:
+          response.message ??
+          `User ${user.registerId} deleted successfully.`,
+      });
+      setUser(null);
+      setConfirmDeleteOpen(false);
+    } catch (error: unknown) {
+      console.error(error);
+      setNotice({
+        tone: "error",
+        text: getErrorMessage(error, "Could not delete this user."),
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -320,12 +355,22 @@ export default function ManageUserPage() {
                   </div>
 
                   <div className="border-t border-slate-200 bg-white px-5 py-4">
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <ShieldIcon />
-                      <span>
-                        The backend controls which fields are returned. If a
-                        field is missing, we display a safe fallback.
-                      </span>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-2 text-sm text-slate-600">
+                        <ShieldIcon />
+                        <span>
+                          The backend controls which fields are returned. If a
+                          field is missing, we display a safe fallback.
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteOpen(true)}
+                        className="inline-flex items-center justify-center rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-500"
+                      >
+                        Delete user
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -334,6 +379,24 @@ export default function ManageUserPage() {
           </div>
         </section>
       </div>
+
+      <ConfirmationCard
+        open={confirmDeleteOpen}
+        title="Delete this user?"
+        description={`This will permanently delete the account for ${user?.name ?? "the selected user"} (${user?.registerId ?? registerId.trim()}). This action cannot be undone.`}
+        confirmText={deleting ? "Deleting..." : "OK, delete"}
+        cancelText="Cancel"
+        loading={deleting}
+        destructive
+        onCancel={() => {
+          if (deleting) {
+            return;
+          }
+
+          setConfirmDeleteOpen(false);
+        }}
+        onConfirm={handleDeleteUser}
+      />
     </div>
   );
 }
