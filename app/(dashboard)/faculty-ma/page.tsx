@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MonthlyPendingRequestsPanel from "@/components/MonthlyPendingRequestsPanel";
 
 const features = [
   {
@@ -46,9 +47,13 @@ export default function FacultyMADashboard() {
             Faculty MA Dashboard
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-600 sm:text-base">
-            Choose a workflow below to manage SAR attendance approvals or
-            update bursary availability for your department.
+            Use the monthly request flow as the main workspace, then move into
+            bursary availability when you need the annual list.
           </p>
+        </div>
+
+        <div className="mt-8">
+          <MonthlyPendingRequestsPanel variant="featured" />
         </div>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-2">

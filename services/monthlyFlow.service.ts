@@ -1,8 +1,6 @@
-import { isAxiosError } from "axios";
 import axiosInstance from "@/lib/axios";
 import type { Batch } from "@/types/batch.types";
 import type { Department } from "@/types/department.types";
-
 
 export interface BatchesResponse {
   batches: Batch[];
@@ -16,16 +14,16 @@ export interface FacultyMADepartmentsResponse {
 export interface MonthlyDocumentBatch {
   id: number;
   name: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface MonthlyDocumentDepartment {
   id: number;
   facultyId: number;
   name: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface MonthlyDocumentUser {
@@ -52,16 +50,7 @@ export interface MonthlyDocumentRecord {
   User: MonthlyDocumentUser;
 }
 
-export interface UploadMonthlyDocumentResponse {
-  success: boolean;
-  message: string;
-  data?: MonthlyDocumentRecord;
-  documentId?: number;
-  canDelete?: boolean;
-}
-
-
-export interface UploadMonthlyDocumentPayload {
+export interface MonthlyDocumentUploadPayload {
   batchId: number;
   departmentId: number;
   month: number;
@@ -69,9 +58,20 @@ export interface UploadMonthlyDocumentPayload {
   file: File;
 }
 
+export interface MonthlyDocumentUploadResponse {
+  success: boolean;
+  message: string;
+  data?: MonthlyDocumentRecord;
+  documentId?: number;
+  canDelete?: boolean;
+}
+
+export interface MonthlyPendingDocumentsResponse {
+  success: boolean;
+  data: MonthlyDocumentRecord[];
+}
 
 export const monthlyFlowService = {
-
   async getBatches(): Promise<BatchesResponse> {
     const response = await axiosInstance.get<BatchesResponse>("/api/batches");
 
@@ -86,9 +86,17 @@ export const monthlyFlowService = {
     return response.data;
   },
 
+  async getPendingRequests(): Promise<MonthlyPendingDocumentsResponse> {
+    const response = await axiosInstance.get<MonthlyPendingDocumentsResponse>(
+      "/api/monthly-documents/pending"
+    );
+
+    return response.data;
+  },
+
   async uploadInitialDocument(
-    payload: UploadMonthlyDocumentPayload
-  ): Promise<UploadMonthlyDocumentResponse> {
+    payload: MonthlyDocumentUploadPayload
+  ): Promise<MonthlyDocumentUploadResponse> {
     const formData = new FormData();
 
     formData.append("batchId", String(payload.batchId));
@@ -97,31 +105,12 @@ export const monthlyFlowService = {
     formData.append("year", String(payload.year));
     formData.append("file", payload.file);
 
-    try {
-      const response =
-        await axiosInstance.post<UploadMonthlyDocumentResponse>(
-          "/api/monthly-documents",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+    const response = await axiosInstance.post<MonthlyDocumentUploadResponse>(
+      "/api/monthly-documents",
+      formData
+    );
 
-      return response.data;
-    } catch (error) {
-
-      if (
-        isAxiosError<UploadMonthlyDocumentResponse>(error) &&
-        error.response?.status === 400 &&
-        error.response.data
-      ) {
-        return error.response.data;
-      }
-
-      throw error;
-    }
+    return response.data;
   },
 };
 
