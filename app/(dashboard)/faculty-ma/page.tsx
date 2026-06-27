@@ -2,12 +2,12 @@ import Link from "next/link";
 
 const features = [
   {
-    title: "Monthly request approve list",
+    title: "Monthly document flow",
     description:
-      "Handle the monthly attendance-sheet request workflow for SAR and upload the approval list using the provided sample file format.",
+      "Upload the initial monthly document for your department, pick a batch and period, and continue the request workflow from one place.",
     href: "/faculty-ma/monthly-request-approval",
     accent: "from-[#17365d] to-[#1f4d7a]",
-    meta: "Monthly SAR request workflow",
+    meta: "Monthly upload workflow",
   },
   {
     title: "Upload bursary available list",
