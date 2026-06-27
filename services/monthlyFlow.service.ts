@@ -1,34 +1,43 @@
-import axios from "axios";
+import { isAxiosError } from "axios";
 import axiosInstance from "@/lib/axios";
+import type { Batch } from "@/types/batch.types";
+import type { Department } from "@/types/department.types";
 
-export interface MonthlyDocumentUploadPayload {
-  batchId: number;
-  departmentId: number;
-  month: number;
-  year: number;
-  file: File;
+/* =========================
+   RESPONSE TYPES
+========================= */
+
+export interface BatchesResponse {
+  batches: Batch[];
 }
 
-export interface ApiErrorResponse {
+export interface FacultyMADepartmentsResponse {
   success: boolean;
-  message: string;
-  documentId?: number;
-  canDelete?: boolean;
+  data: Department[];
 }
 
-export class MonthlyFlowError extends Error {
-  documentId?: number;
-  canDelete?: boolean;
-
-  constructor(message: string, options?: { documentId?: number; canDelete?: boolean }) {
-    super(message);
-    this.name = "MonthlyFlowError";
-    this.documentId = options?.documentId;
-    this.canDelete = options?.canDelete;
-  }
+export interface MonthlyDocumentBatch {
+  id: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface MonthlyDocumentEntity {
+export interface MonthlyDocumentDepartment {
+  id: number;
+  facultyId: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MonthlyDocumentUser {
+  id: number;
+  name: string;
+  registerId: string;
+}
+
+export interface MonthlyDocumentRecord {
   id: number;
   batchId: number;
   departmentId: number;
@@ -41,64 +50,105 @@ export interface MonthlyDocumentEntity {
   status: string;
   createdAt: string;
   updatedAt: string;
-  Batch?: {
-    id: number;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  Department?: {
-    id: number;
-    facultyId: number;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  User?: {
-    id: number;
-    name: string;
-    registerId: string;
-  };
+  Batch: MonthlyDocumentBatch;
+  Department: MonthlyDocumentDepartment;
+  User: MonthlyDocumentUser;
 }
 
-export interface MonthlyDocumentUploadResponse {
+export interface UploadMonthlyDocumentResponse {
   success: boolean;
   message: string;
-  data: MonthlyDocumentEntity;
+  data?: MonthlyDocumentRecord;
+  /** Returned when the document already exists */
+  documentId?: number;
+  /** Returned when the document already exists and can be replaced */
+  canDelete?: boolean;
 }
 
+/* =========================
+   REQUEST TYPES
+========================= */
+
+export interface UploadMonthlyDocumentPayload {
+  batchId: number;
+  departmentId: number;
+  month: number;
+  year: number;
+  file: File;
+}
+
+/* =========================
+   SERVICE
+========================= */
+
 export const monthlyFlowService = {
-  async uploadInitialDocument(payload: MonthlyDocumentUploadPayload) {
+  /**
+   * Fetch all available batches.
+   */
+  async getBatches(): Promise<BatchesResponse> {
+    const response = await axiosInstance.get<BatchesResponse>("/api/batches");
+
+    return response.data;
+  },
+
+  /**
+   * Fetch departments assigned to the logged-in Faculty MA officer.
+   */
+  async getDepartments(): Promise<FacultyMADepartmentsResponse> {
+    const response = await axiosInstance.get<FacultyMADepartmentsResponse>(
+      "/api/faculty-ma/departments"
+    );
+
+    return response.data;
+  },
+
+  /**
+   * Upload the initial monthly document for a department and batch.
+   *
+   * POST /api/monthly-documents
+   * Body: multipart/form-data  { batchId, departmentId, month, year, file }
+   */
+  async uploadInitialDocument(
+    payload: UploadMonthlyDocumentPayload
+  ): Promise<UploadMonthlyDocumentResponse> {
+    const formData = new FormData();
+
+    formData.append("batchId", String(payload.batchId));
+    formData.append("departmentId", String(payload.departmentId));
+    formData.append("month", String(payload.month));
+    formData.append("year", String(payload.year));
+    formData.append("file", payload.file);
+
     try {
-      const formData = new FormData();
-
-      formData.append("batchId", String(payload.batchId));
-      formData.append("departmentId", String(payload.departmentId));
-      formData.append("month", String(payload.month));
-      formData.append("year", String(payload.year));
-      formData.append("file", payload.file);
-
-      const response = await axiosInstance.post<MonthlyDocumentUploadResponse>(
-        "/api/monthly-documents",
-        formData
-      );
+      const response =
+        await axiosInstance.post<UploadMonthlyDocumentResponse>(
+          "/api/monthly-documents",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
 
       return response.data;
     } catch (error) {
-      if (axios.isAxiosError<ApiErrorResponse>(error)) {
-        throw new MonthlyFlowError(
-          error.response?.data.message ??
-            error.message ??
-            "Monthly upload failed.",
-          {
-            documentId: error.response?.data.documentId,
-            canDelete: error.response?.data.canDelete,
-          }
-        );
+      // The API returns HTTP 400 when the document already exists but still
+      // sends a structured JSON body ({ success, message, documentId, canDelete }).
+      // Return that body as a normal resolved value so the caller can handle it
+      // gracefully without a thrown exception.
+      if (
+        isAxiosError<UploadMonthlyDocumentResponse>(error) &&
+        error.response?.status === 400 &&
+        error.response.data
+      ) {
+        return error.response.data;
       }
 
-      throw new MonthlyFlowError("Unexpected server error.");
+      // Re-throw anything else (network errors, 5xx, etc.)
+      throw error;
     }
   },
 };
+
 export default monthlyFlowService;
