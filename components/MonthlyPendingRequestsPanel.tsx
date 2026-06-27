@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import monthlyFlowService, {
   type MonthlyDocumentRecord,
@@ -41,20 +40,6 @@ function ClockIcon() {
         d="M12 7v5l3 2"
         stroke="currentColor"
         strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ArrowIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-      <path
-        d="M5 12h14M13 6l6 6-6 6"
-        stroke="currentColor"
-        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -136,7 +121,7 @@ export default function MonthlyPendingRequestsPanel({
     };
   }, []);
 
-  const visibleRequests = useMemo(() => pendingRequests.slice(0, 4), [pendingRequests]);
+  const visibleRequests = pendingRequests.slice(0, 3);
   const pendingCount = pendingRequests.length;
 
   const panelClassName =
@@ -172,7 +157,7 @@ export default function MonthlyPendingRequestsPanel({
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/40 px-4 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
               Pending
@@ -189,13 +174,6 @@ export default function MonthlyPendingRequestsPanel({
               {pendingRequests[0] ? formatMonth(pendingRequests[0]) : "No queue"}
             </p>
           </div>
-          <Link
-            href="/faculty-ma/monthly-request-approval"
-            className="col-span-2 inline-flex items-center justify-center gap-2 rounded-2xl border border-[#27b8d2]/25 bg-[#27b8d2]/5 px-4 py-3 text-sm font-semibold text-[#17365d] transition hover:border-[#27b8d2]/50 hover:bg-[#27b8d2]/10 sm:col-span-1"
-          >
-            Open flow
-            <ArrowIcon />
-          </Link>
         </div>
       </div>
 
@@ -232,11 +210,11 @@ export default function MonthlyPendingRequestsPanel({
                     Document #{record.id}
                   </p>
                   <h3 className="mt-1 text-lg font-bold text-[#17365d]">
-                    {record.Department?.name ?? "Unknown department"}
+                    {formatMonth(record)}
                   </h3>
                   <p className="mt-1 text-sm text-slate-600">
-                    Batch {record.Batch?.name ?? record.batchId} ·{" "}
-                    {formatMonth(record)}
+                    {record.User?.name ?? `User ${record.uploadedBy}`} -{" "}
+                    {record.status}
                   </p>
                 </div>
 
@@ -262,10 +240,10 @@ export default function MonthlyPendingRequestsPanel({
 
                 <div className="rounded-2xl border border-white bg-white px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    File
+                    Step
                   </p>
                   <p className="mt-1 truncate text-sm font-semibold text-[#17365d]">
-                    {record.currentFile.split("\\").pop() ?? record.currentFile}
+                    {record.currentStep.replace(/_/g, " ")}
                   </p>
                 </div>
 
