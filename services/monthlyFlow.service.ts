@@ -3,9 +3,6 @@ import axiosInstance from "@/lib/axios";
 import type { Batch } from "@/types/batch.types";
 import type { Department } from "@/types/department.types";
 
-/* =========================
-   RESPONSE TYPES
-========================= */
 
 export interface BatchesResponse {
   batches: Batch[];
@@ -59,15 +56,10 @@ export interface UploadMonthlyDocumentResponse {
   success: boolean;
   message: string;
   data?: MonthlyDocumentRecord;
-  /** Returned when the document already exists */
   documentId?: number;
-  /** Returned when the document already exists and can be replaced */
   canDelete?: boolean;
 }
 
-/* =========================
-   REQUEST TYPES
-========================= */
 
 export interface UploadMonthlyDocumentPayload {
   batchId: number;
@@ -77,23 +69,15 @@ export interface UploadMonthlyDocumentPayload {
   file: File;
 }
 
-/* =========================
-   SERVICE
-========================= */
 
 export const monthlyFlowService = {
-  /**
-   * Fetch all available batches.
-   */
+
   async getBatches(): Promise<BatchesResponse> {
     const response = await axiosInstance.get<BatchesResponse>("/api/batches");
 
     return response.data;
   },
 
-  /**
-   * Fetch departments assigned to the logged-in Faculty MA officer.
-   */
   async getDepartments(): Promise<FacultyMADepartmentsResponse> {
     const response = await axiosInstance.get<FacultyMADepartmentsResponse>(
       "/api/faculty-ma/departments"
@@ -102,12 +86,6 @@ export const monthlyFlowService = {
     return response.data;
   },
 
-  /**
-   * Upload the initial monthly document for a department and batch.
-   *
-   * POST /api/monthly-documents
-   * Body: multipart/form-data  { batchId, departmentId, month, year, file }
-   */
   async uploadInitialDocument(
     payload: UploadMonthlyDocumentPayload
   ): Promise<UploadMonthlyDocumentResponse> {
@@ -133,10 +111,7 @@ export const monthlyFlowService = {
 
       return response.data;
     } catch (error) {
-      // The API returns HTTP 400 when the document already exists but still
-      // sends a structured JSON body ({ success, message, documentId, canDelete }).
-      // Return that body as a normal resolved value so the caller can handle it
-      // gracefully without a thrown exception.
+
       if (
         isAxiosError<UploadMonthlyDocumentResponse>(error) &&
         error.response?.status === 400 &&
@@ -145,7 +120,6 @@ export const monthlyFlowService = {
         return error.response.data;
       }
 
-      // Re-throw anything else (network errors, 5xx, etc.)
       throw error;
     }
   },
