@@ -587,7 +587,6 @@ export default function MonthlyPendingRequestsPanel({
                   <input
                     id={`signed-document-input-${record.id}`}
                     type="file"
-                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
                     className="hidden"
                     onChange={(event) =>
                       void handleSignedDocumentSelected(record.id, event)
