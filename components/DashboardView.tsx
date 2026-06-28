@@ -1,3 +1,5 @@
+import MonthlyPendingRequestsPanel from "@/components/MonthlyPendingRequestsPanel";
+
 type Stat = {
 	label: string;
 	value: string;
@@ -54,6 +56,8 @@ export default function DashboardView({
 					</div>
 				))}
 			</section>
+
+			<MonthlyPendingRequestsPanel />
 
 			<section className="grid gap-6 lg:grid-cols-2">
 				<div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
