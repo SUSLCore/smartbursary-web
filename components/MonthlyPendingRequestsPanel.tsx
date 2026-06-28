@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import monthlyFlowService, {
   type MonthlyDocumentRecord,
@@ -80,6 +80,16 @@ export default function MonthlyPendingRequestsPanel({
   );
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState<NoticeState>(emptyNotice);
+  const [selectedDocument, setSelectedDocument] =
+    useState<MonthlyDocumentRecord | null>(null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(
+    null
+  );
+  const [loadingDocumentId, setLoadingDocumentId] = useState<number | null>(
+    null
+  );
+  const [detailNotice, setDetailNotice] = useState<NoticeState>(emptyNotice);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
     let active = true;
@@ -121,8 +131,57 @@ export default function MonthlyPendingRequestsPanel({
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   const visibleRequests = pendingRequests.slice(0, 3);
   const pendingCount = pendingRequests.length;
+
+  const handleSelectDocument = async (documentId: number) => {
+    setSelectedDocumentId(documentId);
+    setLoadingDocumentId(documentId);
+    setDetailNotice(emptyNotice);
+    setSelectedDocument(null);
+
+    try {
+      const response = await monthlyFlowService.getMonthlyDocumentById(
+        documentId
+      );
+
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      if (response.success && response.data) {
+        setSelectedDocument(response.data);
+      } else {
+        setSelectedDocument(null);
+        setDetailNotice({
+          tone: "info",
+          text: response.message ?? "Monthly document details are unavailable.",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      setSelectedDocument(null);
+      setDetailNotice({
+        tone: "error",
+        text: "Could not load that monthly document right now.",
+      });
+    } finally {
+      if (isMountedRef.current) {
+        setLoadingDocumentId((current) => (current === documentId ? null : current));
+      }
+    }
+  };
 
   const panelClassName =
     variant === "featured"
@@ -200,9 +259,15 @@ export default function MonthlyPendingRequestsPanel({
       ) : (
         <div className="mt-6 space-y-3">
           {visibleRequests.map((record) => (
-            <article
+            <button
               key={record.id}
-              className="rounded-3xl border border-slate-200/70 bg-slate-50 p-4 transition hover:border-[#27b8d2]/40 hover:bg-[#27b8d2]/5"
+              type="button"
+              onClick={() => void handleSelectDocument(record.id)}
+              className={`w-full rounded-3xl border p-4 text-left transition ${
+                selectedDocumentId === record.id
+                  ? "border-[#27b8d2]/50 bg-[#27b8d2]/5 shadow-sm"
+                  : "border-slate-200/70 bg-slate-50 hover:border-[#27b8d2]/40 hover:bg-[#27b8d2]/5"
+              }`}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
@@ -228,36 +293,12 @@ export default function MonthlyPendingRequestsPanel({
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-white bg-white px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Uploaded by
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-[#17365d]">
-                    {record.User?.name ?? `User ${record.uploadedBy}`}
-                  </p>
+              {selectedDocumentId === record.id && loadingDocumentId === record.id ? (
+                <div className="mt-4 rounded-2xl border border-white bg-white px-4 py-3 text-sm text-slate-600">
+                  Loading document details...
                 </div>
-
-                <div className="rounded-2xl border border-white bg-white px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Step
-                  </p>
-                  <p className="mt-1 truncate text-sm font-semibold text-[#17365d]">
-                    {record.currentStep.replace(/_/g, " ")}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white bg-white px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Created
-                  </p>
-                  <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-[#17365d]">
-                    <ClockIcon />
-                    {formatDate(record.createdAt)}
-                  </p>
-                </div>
-              </div>
-            </article>
+              ) : null}
+            </button>
           ))}
 
           {pendingCount > visibleRequests.length && (
@@ -266,6 +307,84 @@ export default function MonthlyPendingRequestsPanel({
               request(s).
             </p>
           )}
+        </div>
+      )}
+
+      {detailNotice && (
+        <div
+          className={`mt-5 rounded-2xl border px-4 py-3 text-sm font-medium ${noticeClassName(
+            detailNotice.tone
+          )}`}
+        >
+          {detailNotice.text}
+        </div>
+      )}
+
+      {selectedDocument && (
+        <div className="mt-6 rounded-3xl border border-[#27b8d2]/20 bg-[#27b8d2]/5 p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#27b8d2]">
+                Document details
+              </p>
+              <h3 className="mt-1 text-xl font-bold text-[#17365d]">
+                {selectedDocument.Department?.name ?? "Unknown department"}
+              </h3>
+              <p className="mt-1 text-sm text-slate-600">
+                Batch {selectedDocument.Batch?.name ?? selectedDocument.batchId}{" "}
+                - {formatMonth(selectedDocument)}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 ring-1 ring-slate-200">
+                {selectedDocument.status}
+              </span>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d] ring-1 ring-slate-200">
+                {selectedDocument.currentStep.replace(/_/g, " ")}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-white bg-white px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Uploaded by
+              </p>
+              <p className="mt-1 text-sm font-semibold text-[#17365d]">
+                {selectedDocument.User?.name ?? `User ${selectedDocument.uploadedBy}`}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white bg-white px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Register ID
+              </p>
+              <p className="mt-1 text-sm font-semibold text-[#17365d]">
+                {selectedDocument.User?.registerId ?? "—"}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white bg-white px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Created
+              </p>
+              <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-[#17365d]">
+                <ClockIcon />
+                {formatDate(selectedDocument.createdAt)}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white bg-white px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                File
+              </p>
+              <p className="mt-1 truncate text-sm font-semibold text-[#17365d]">
+                {selectedDocument.currentFile.split("\\").pop() ??
+                  selectedDocument.currentFile}
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </section>

@@ -71,6 +71,12 @@ export interface MonthlyPendingDocumentsResponse {
   data: MonthlyDocumentRecord[];
 }
 
+export interface MonthlyDocumentResponse {
+  success: boolean;
+  data?: MonthlyDocumentRecord;
+  message?: string;
+}
+
 export const monthlyFlowService = {
   async getBatches(): Promise<BatchesResponse> {
     const response = await axiosInstance.get<BatchesResponse>("/api/batches");
@@ -89,6 +95,16 @@ export const monthlyFlowService = {
   async getPendingRequests(): Promise<MonthlyPendingDocumentsResponse> {
     const response = await axiosInstance.get<MonthlyPendingDocumentsResponse>(
       "/api/monthly-documents/pending"
+    );
+
+    return response.data;
+  },
+
+  async getMonthlyDocumentById(
+    documentId: number
+  ): Promise<MonthlyDocumentResponse> {
+    const response = await axiosInstance.get<MonthlyDocumentResponse>(
+      `/api/monthly-documents/${documentId}`
     );
 
     return response.data;
