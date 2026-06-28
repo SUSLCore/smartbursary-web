@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 
 import monthlyFlowService, {
   type MonthlyDocumentRecord,
@@ -52,6 +60,20 @@ function DownloadIcon() {
     <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
       <path
         d="M12 3v10m0 0 4-4m-4 4-4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function UploadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+      <path
+        d="M12 16V4m0 0 4 4m-4-4-4 4M5 20h14"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
@@ -132,22 +154,28 @@ export default function MonthlyPendingRequestsPanel({
   const [downloadingDocumentId, setDownloadingDocumentId] = useState<
     number | null
   >(null);
+  const [uploadingDocumentId, setUploadingDocumentId] = useState<number | null>(
+    null
+  );
   const [detailNotice, setDetailNotice] = useState<NoticeState>(emptyNotice);
   const mountedRef = useRef(true);
 
-  useEffect(() => {
-    mountedRef.current = true;
+  const loadPendingRequests = useCallback(
+    async (options?: { showLoading?: boolean }) => {
+      const showLoading = options?.showLoading ?? false;
 
-    let active = true;
-
-    const loadPendingRequests = async () => {
       try {
-        setLoading(true);
-        setNotice(emptyNotice);
+        if (showLoading && mountedRef.current) {
+          setLoading(true);
+        }
+
+        if (mountedRef.current) {
+          setNotice(emptyNotice);
+        }
 
         const response = await monthlyFlowService.getPendingRequests();
 
-        if (!active) {
+        if (!mountedRef.current) {
           return;
         }
 
@@ -155,7 +183,7 @@ export default function MonthlyPendingRequestsPanel({
       } catch (error) {
         console.error(error);
 
-        if (!active) {
+        if (!mountedRef.current) {
           return;
         }
 
@@ -164,19 +192,23 @@ export default function MonthlyPendingRequestsPanel({
           text: "Could not load pending monthly requests right now.",
         });
       } finally {
-        if (active) {
+        if (mountedRef.current && showLoading) {
           setLoading(false);
         }
       }
-    };
+    },
+    []
+  );
 
-    void loadPendingRequests();
+  useEffect(() => {
+    mountedRef.current = true;
+
+    void loadPendingRequests({ showLoading: true });
 
     return () => {
-      active = false;
       mountedRef.current = false;
     };
-  }, []);
+  }, [loadPendingRequests]);
 
   const pendingCount = pendingRequests.length;
 
@@ -264,6 +296,70 @@ export default function MonthlyPendingRequestsPanel({
     } finally {
       if (mountedRef.current) {
         setDownloadingDocumentId((current) =>
+          current === documentId ? null : current
+        );
+      }
+    }
+  };
+
+  const handleOpenSignedUpload = (
+    documentId: number,
+    event?: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event?.stopPropagation();
+    document.getElementById(`signed-document-input-${documentId}`)?.click();
+  };
+
+  const handleSignedDocumentSelected = async (
+    documentId: number,
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    event.stopPropagation();
+
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setUploadingDocumentId(documentId);
+    setDetailNotice(emptyNotice);
+
+    try {
+      const response = await monthlyFlowService.uploadSignedDocument(
+        documentId,
+        file
+      );
+
+      if (!mountedRef.current) {
+        return;
+      }
+
+      if (response.data) {
+        setSelectedDocument(response.data);
+      }
+
+      setDetailNotice({
+        tone: "success",
+        text:
+          response.message ??
+          `Signed document uploaded successfully for document #${documentId}.`,
+      });
+
+      await loadPendingRequests();
+    } catch (error) {
+      console.error(error);
+
+      if (mountedRef.current) {
+        setDetailNotice({
+          tone: "error",
+          text: "Could not upload that signed document right now.",
+        });
+      }
+    } finally {
+      if (mountedRef.current) {
+        setUploadingDocumentId((current) =>
           current === documentId ? null : current
         );
       }
@@ -421,6 +517,26 @@ export default function MonthlyPendingRequestsPanel({
                     <DownloadIcon />
                     {downloadingDocumentId === record.id ? "Downloading..." : "Download"}
                   </button>
+                  <button
+                    type="button"
+                    onClick={(event) => handleOpenSignedUpload(record.id, event)}
+                    disabled={uploadingDocumentId === record.id}
+                    className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <UploadIcon />
+                    {uploadingDocumentId === record.id
+                      ? "Uploading..."
+                      : "Upload signed"}
+                  </button>
+                  <input
+                    id={`signed-document-input-${record.id}`}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    className="hidden"
+                    onChange={(event) =>
+                      void handleSignedDocumentSelected(record.id, event)
+                    }
+                  />
                 </div>
 
                 {isSelected && loadingDocumentId === record.id ? (
