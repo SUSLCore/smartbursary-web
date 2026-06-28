@@ -1,13 +1,14 @@
 import Link from "next/link";
+import MonthlyPendingRequestsPanel from "@/components/MonthlyPendingRequestsPanel";
 
 const features = [
   {
-    title: "Monthly request approve list",
+    title: "Monthly document flow",
     description:
-      "Handle the monthly attendance-sheet request workflow for SAR and upload the approval list using the provided sample file format.",
+      "Upload the initial monthly document for your department, pick a batch and period, and continue the request workflow from one place.",
     href: "/faculty-ma/monthly-request-approval",
     accent: "from-[#17365d] to-[#1f4d7a]",
-    meta: "Monthly SAR request workflow",
+    meta: "Monthly upload workflow",
   },
   {
     title: "Upload bursary available list",
@@ -46,9 +47,13 @@ export default function FacultyMADashboard() {
             Faculty MA Dashboard
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-600 sm:text-base">
-            Choose a workflow below to manage SAR attendance approvals or
-            update bursary availability for your department.
+            Use the monthly request flow as the main workspace, then move into
+            bursary availability when you need the annual list.
           </p>
+        </div>
+
+        <div className="mt-8">
+          <MonthlyPendingRequestsPanel variant="featured" />
         </div>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
