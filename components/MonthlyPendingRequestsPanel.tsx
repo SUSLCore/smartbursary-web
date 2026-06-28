@@ -157,6 +157,9 @@ export default function MonthlyPendingRequestsPanel({
   const [uploadingDocumentId, setUploadingDocumentId] = useState<number | null>(
     null
   );
+  const [signedRemarksById, setSignedRemarksById] = useState<
+    Record<number, string>
+  >({});
   const [detailNotice, setDetailNotice] = useState<NoticeState>(emptyNotice);
   const mountedRef = useRef(true);
 
@@ -304,9 +307,19 @@ export default function MonthlyPendingRequestsPanel({
 
   const handleOpenSignedUpload = (
     documentId: number,
+    remarks: string,
     event?: React.MouseEvent<HTMLButtonElement>
   ) => {
     event?.stopPropagation();
+
+    if (!remarks.trim()) {
+      setDetailNotice({
+        tone: "info",
+        text: "Please add remarks before uploading the signed document.",
+      });
+      return;
+    }
+
     document.getElementById(`signed-document-input-${documentId}`)?.click();
   };
 
@@ -323,13 +336,24 @@ export default function MonthlyPendingRequestsPanel({
       return;
     }
 
+    const remarks = signedRemarksById[documentId]?.trim();
+
+    if (!remarks) {
+      setDetailNotice({
+        tone: "info",
+        text: "Please add remarks before uploading the signed document.",
+      });
+      return;
+    }
+
     setUploadingDocumentId(documentId);
     setDetailNotice(emptyNotice);
 
     try {
       const response = await monthlyFlowService.uploadSignedDocument(
         documentId,
-        file
+        file,
+        remarks
       );
 
       if (!mountedRef.current) {
@@ -339,6 +363,11 @@ export default function MonthlyPendingRequestsPanel({
       if (response.data) {
         setSelectedDocument(response.data);
       }
+
+      setSignedRemarksById((current) => ({
+        ...current,
+        [documentId]: "",
+      }));
 
       setDetailNotice({
         tone: "success",
@@ -508,6 +537,27 @@ export default function MonthlyPendingRequestsPanel({
                   <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 ring-1 ring-slate-200">
                     Updated {formatDate(record.updatedAt)}
                   </span>
+                </div>
+
+                <div className="mt-4 flex flex-col gap-3">
+                  <label className="block text-sm font-medium text-[#17365d]">
+                    Signed document remarks
+                    <input
+                      type="text"
+                      value={signedRemarksById[record.id] ?? ""}
+                      onChange={(event) =>
+                        setSignedRemarksById((current) => ({
+                          ...current,
+                          [record.id]: event.target.value,
+                        }))
+                      }
+                      onClick={(event) => event.stopPropagation()}
+                      placeholder="Enter remarks for the signed upload"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#27b8d2] focus:ring-4 focus:ring-[#27b8d2]/10"
+                    />
+                  </label>
+
+                  <div className="flex flex-wrap items-center gap-3">
                   <button
                     type="button"
                     onClick={(event) => void handleDownloadDocument(record.id, event)}
@@ -519,7 +569,13 @@ export default function MonthlyPendingRequestsPanel({
                   </button>
                   <button
                     type="button"
-                    onClick={(event) => handleOpenSignedUpload(record.id, event)}
+                    onClick={(event) =>
+                      handleOpenSignedUpload(
+                        record.id,
+                        signedRemarksById[record.id] ?? "",
+                        event
+                      )
+                    }
                     disabled={uploadingDocumentId === record.id}
                     className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-70"
                   >
@@ -537,6 +593,7 @@ export default function MonthlyPendingRequestsPanel({
                       void handleSignedDocumentSelected(record.id, event)
                     }
                   />
+                  </div>
                 </div>
 
                 {isSelected && loadingDocumentId === record.id ? (

@@ -156,11 +156,13 @@ export const monthlyFlowService = {
 
   async uploadSignedDocument(
     documentId: number,
-    file: File
+    file: File,
+    remarks: string
   ): Promise<MonthlyDocumentSignResponse> {
     const formData = new FormData();
 
     formData.append("file", file);
+    formData.append("remarks", remarks);
 
     const response = await axiosInstance.put<MonthlyDocumentSignResponse>(
       `/api/monthly-documents/${documentId}/sign`,
