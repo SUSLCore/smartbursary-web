@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 
 import monthlyFlowService, {
   type MonthlyDocumentRecord,
@@ -47,6 +47,20 @@ function ClockIcon() {
   );
 }
 
+function DownloadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+      <path
+        d="M12 3v10m0 0 4-4m-4 4-4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function noticeClassName(tone: NoticeTone) {
   if (tone === "error") return "border-red-200 bg-red-50 text-red-700";
   if (tone === "success") {
@@ -70,6 +84,33 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function getFileName(path: string) {
+  return path.split("\\").pop() ?? path;
+}
+
+function DetailCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-white bg-white px-4 py-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+        {label}
+      </p>
+      <p className="mt-1 break-all text-sm font-semibold text-[#17365d]">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function parseKeyboardActivation(event: KeyboardEvent<HTMLDivElement>) {
+  return event.key === "Enter" || event.key === " ";
+}
+
 export default function MonthlyPendingRequestsPanel({
   variant = "compact",
 }: {
@@ -88,10 +129,15 @@ export default function MonthlyPendingRequestsPanel({
   const [loadingDocumentId, setLoadingDocumentId] = useState<number | null>(
     null
   );
+  const [downloadingDocumentId, setDownloadingDocumentId] = useState<
+    number | null
+  >(null);
   const [detailNotice, setDetailNotice] = useState<NoticeState>(emptyNotice);
-  const isMountedRef = useRef(true);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
+    mountedRef.current = true;
+
     let active = true;
 
     const loadPendingRequests = async () => {
@@ -128,37 +174,30 @@ export default function MonthlyPendingRequestsPanel({
 
     return () => {
       active = false;
+      mountedRef.current = false;
     };
   }, []);
 
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  const visibleRequests = pendingRequests.slice(0, 3);
   const pendingCount = pendingRequests.length;
 
   const handleSelectDocument = async (documentId: number) => {
     setSelectedDocumentId(documentId);
     setLoadingDocumentId(documentId);
-    setDetailNotice(emptyNotice);
     setSelectedDocument(null);
+    setDetailNotice(emptyNotice);
 
     try {
       const response = await monthlyFlowService.getMonthlyDocumentById(
         documentId
       );
 
-      if (!isMountedRef.current) {
+      if (!mountedRef.current) {
         return;
       }
 
       if (response.success && response.data) {
         setSelectedDocument(response.data);
       } else {
-        setSelectedDocument(null);
         setDetailNotice({
           tone: "info",
           text: response.message ?? "Monthly document details are unavailable.",
@@ -167,18 +206,66 @@ export default function MonthlyPendingRequestsPanel({
     } catch (error) {
       console.error(error);
 
-      if (!isMountedRef.current) {
+      if (!mountedRef.current) {
         return;
       }
 
-      setSelectedDocument(null);
       setDetailNotice({
         tone: "error",
         text: "Could not load that monthly document right now.",
       });
     } finally {
-      if (isMountedRef.current) {
-        setLoadingDocumentId((current) => (current === documentId ? null : current));
+      if (mountedRef.current) {
+        setLoadingDocumentId((current) =>
+          current === documentId ? null : current
+        );
+      }
+    }
+  };
+
+  const handleDownloadDocument = async (
+    documentId: number,
+    event?: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event?.stopPropagation();
+    setDownloadingDocumentId(documentId);
+    setDetailNotice(emptyNotice);
+
+    try {
+      const { blob, filename } =
+        await monthlyFlowService.downloadMonthlyDocument(documentId);
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+
+      anchor.href = url;
+      anchor.download = filename.endsWith(".xlsx") || filename.endsWith(".xls")
+        ? filename
+        : `${filename}.xlsx`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(url);
+
+      if (mountedRef.current) {
+        setDetailNotice({
+          tone: "success",
+          text: `Download started for document #${documentId}.`,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+
+      if (mountedRef.current) {
+        setDetailNotice({
+          tone: "error",
+          text: "Could not download that monthly document right now.",
+        });
+      }
+    } finally {
+      if (mountedRef.current) {
+        setDownloadingDocumentId((current) =>
+          current === documentId ? null : current
+        );
       }
     }
   };
@@ -210,9 +297,9 @@ export default function MonthlyPendingRequestsPanel({
             Pending monthly requests
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            Review the documents that are already waiting in the monthly
-            workflow. This panel is shared across all staff dashboards except
-            admin and student views.
+            Review the documents waiting in the monthly workflow. Click a
+            request to load its full details, or download the file directly from
+            the card.
           </p>
         </div>
 
@@ -258,55 +345,174 @@ export default function MonthlyPendingRequestsPanel({
         </div>
       ) : (
         <div className="mt-6 space-y-3">
-          {visibleRequests.map((record) => (
-            <button
-              key={record.id}
-              type="button"
-              onClick={() => void handleSelectDocument(record.id)}
-              className={`w-full rounded-3xl border p-4 text-left transition ${
-                selectedDocumentId === record.id
-                  ? "border-[#27b8d2]/50 bg-[#27b8d2]/5 shadow-sm"
-                  : "border-slate-200/70 bg-slate-50 hover:border-[#27b8d2]/40 hover:bg-[#27b8d2]/5"
-              }`}
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#27b8d2]">
-                    Document #{record.id}
-                  </p>
-                  <h3 className="mt-1 text-lg font-bold text-[#17365d]">
-                    {formatMonth(record)}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-600">
-                    {record.User?.name ?? `User ${record.uploadedBy}`} -{" "}
-                    {record.status}
-                  </p>
+          {pendingRequests.map((record) => {
+            const isSelected = selectedDocumentId === record.id;
+            const document = selectedDocument?.id === record.id ? selectedDocument : null;
+
+            return (
+              <div
+                key={record.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => void handleSelectDocument(record.id)}
+                onKeyDown={(event) => {
+                  if (parseKeyboardActivation(event)) {
+                    event.preventDefault();
+                    void handleSelectDocument(record.id);
+                  }
+                }}
+                aria-expanded={isSelected}
+                className={`w-full rounded-3xl border p-4 text-left transition focus:outline-none focus:ring-4 focus:ring-[#27b8d2]/15 ${
+                  isSelected
+                    ? "border-[#27b8d2]/50 bg-[#27b8d2]/5 shadow-sm"
+                    : "border-slate-200/70 bg-slate-50 hover:border-[#27b8d2]/40 hover:bg-[#27b8d2]/5"
+                }`}
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#27b8d2]">
+                      Document #{record.id}
+                    </p>
+                    <h3 className="mt-1 text-lg font-bold text-[#17365d]">
+                      {formatMonth(record)}
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-600">
+                      {record.User?.name ?? `User ${record.uploadedBy}`} -{" "}
+                      {record.status}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 ring-1 ring-slate-200">
+                      {record.status}
+                    </span>
+                    <span className="rounded-full bg-[#17365d]/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d]">
+                      {record.currentStep.replace(/_/g, " ")}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <DetailCard
+                    label="Uploaded by"
+                    value={record.User?.name ?? `User ${record.uploadedBy}`}
+                  />
+                  <DetailCard label="Batch" value={record.Batch?.name ?? record.batchId} />
+                  <DetailCard
+                    label="Department"
+                    value={record.Department?.name ?? record.departmentId}
+                  />
+                  <DetailCard label="File" value={getFileName(record.currentFile)} />
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center gap-3">
                   <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 ring-1 ring-slate-200">
-                    {record.status}
+                    Created {formatDate(record.createdAt)}
                   </span>
-                  <span className="rounded-full bg-[#17365d]/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d]">
-                    {record.currentStep.replace(/_/g, " ")}
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 ring-1 ring-slate-200">
+                    Updated {formatDate(record.updatedAt)}
                   </span>
+                  <button
+                    type="button"
+                    onClick={(event) => void handleDownloadDocument(record.id, event)}
+                    disabled={downloadingDocumentId === record.id}
+                    className="ml-auto inline-flex items-center gap-2 rounded-full border border-[#27b8d2]/20 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d] transition hover:border-[#27b8d2]/40 hover:bg-[#27b8d2]/10 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <DownloadIcon />
+                    {downloadingDocumentId === record.id ? "Downloading..." : "Download"}
+                  </button>
                 </div>
+
+                {isSelected && loadingDocumentId === record.id ? (
+                  <div className="mt-4 rounded-2xl border border-white bg-white px-4 py-3 text-sm text-slate-600">
+                    Loading document details...
+                  </div>
+                ) : null}
+
+                {document ? (
+                  <div className="mt-4 space-y-4">
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <DetailCard
+                        label="Register ID"
+                        value={document.User?.registerId ?? "N/A"}
+                      />
+                      <DetailCard
+                        label="Month"
+                        value={
+                          monthNames[document.month - 1] ?? `Month ${document.month}`
+                        }
+                      />
+                      <DetailCard label="Year" value={document.year} />
+                      <DetailCard label="Status" value={document.status} />
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <DetailCard
+                        label="Current step"
+                        value={document.currentStep.replace(/_/g, " ")}
+                      />
+                      <DetailCard label="Document ID" value={document.id} />
+                      <DetailCard
+                        label="Created at"
+                        value={
+                          <span className="inline-flex items-center gap-1.5">
+                            <ClockIcon />
+                            {formatDate(document.createdAt)}
+                          </span>
+                        }
+                      />
+                      <DetailCard
+                        label="Updated at"
+                        value={
+                          <span className="inline-flex items-center gap-1.5">
+                            <ClockIcon />
+                            {formatDate(document.updatedAt)}
+                          </span>
+                        }
+                      />
+                    </div>
+
+                    <div className="grid gap-3 lg:grid-cols-2">
+                      <DetailCard label="Current file" value={document.currentFile} />
+                      <DetailCard label="Original file" value={document.originalFile} />
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <DetailCard
+                        label="Department ID"
+                        value={document.departmentId}
+                      />
+                      <DetailCard label="Batch ID" value={document.batchId} />
+                      <DetailCard label="Uploaded by ID" value={document.uploadedBy} />
+                      <DetailCard
+                        label="Batch name"
+                        value={document.Batch?.name ?? "N/A"}
+                      />
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <DetailCard
+                        label="Department name"
+                        value={document.Department?.name ?? "N/A"}
+                      />
+                      <DetailCard
+                        label="Faculty ID"
+                        value={document.Department?.facultyId ?? "N/A"}
+                      />
+                      <DetailCard
+                        label="User name"
+                        value={document.User?.name ?? "N/A"}
+                      />
+                      <DetailCard
+                        label="Register number"
+                        value={document.User?.registerId ?? "N/A"}
+                      />
+                    </div>
+                  </div>
+                ) : null}
               </div>
-
-              {selectedDocumentId === record.id && loadingDocumentId === record.id ? (
-                <div className="mt-4 rounded-2xl border border-white bg-white px-4 py-3 text-sm text-slate-600">
-                  Loading document details...
-                </div>
-              ) : null}
-            </button>
-          ))}
-
-          {pendingCount > visibleRequests.length && (
-            <p className="text-sm text-slate-500">
-              Showing {visibleRequests.length} of {pendingCount} pending
-              request(s).
-            </p>
-          )}
+            );
+          })}
         </div>
       )}
 
@@ -317,74 +523,6 @@ export default function MonthlyPendingRequestsPanel({
           )}`}
         >
           {detailNotice.text}
-        </div>
-      )}
-
-      {selectedDocument && (
-        <div className="mt-6 rounded-3xl border border-[#27b8d2]/20 bg-[#27b8d2]/5 p-5 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#27b8d2]">
-                Document details
-              </p>
-              <h3 className="mt-1 text-xl font-bold text-[#17365d]">
-                {selectedDocument.Department?.name ?? "Unknown department"}
-              </h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Batch {selectedDocument.Batch?.name ?? selectedDocument.batchId}{" "}
-                - {formatMonth(selectedDocument)}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 ring-1 ring-slate-200">
-                {selectedDocument.status}
-              </span>
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d] ring-1 ring-slate-200">
-                {selectedDocument.currentStep.replace(/_/g, " ")}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-white bg-white px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                Uploaded by
-              </p>
-              <p className="mt-1 text-sm font-semibold text-[#17365d]">
-                {selectedDocument.User?.name ?? `User ${selectedDocument.uploadedBy}`}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white bg-white px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                Register ID
-              </p>
-              <p className="mt-1 text-sm font-semibold text-[#17365d]">
-                {selectedDocument.User?.registerId ?? "—"}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white bg-white px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                Created
-              </p>
-              <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-[#17365d]">
-                <ClockIcon />
-                {formatDate(selectedDocument.createdAt)}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white bg-white px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                File
-              </p>
-              <p className="mt-1 truncate text-sm font-semibold text-[#17365d]">
-                {selectedDocument.currentFile.split("\\").pop() ??
-                  selectedDocument.currentFile}
-              </p>
-            </div>
-          </div>
         </div>
       )}
     </section>

@@ -77,6 +77,25 @@ export interface MonthlyDocumentResponse {
   message?: string;
 }
 
+export interface MonthlyDocumentDownloadResponse {
+  blob: Blob;
+  filename: string;
+}
+
+function getFilenameFromContentDisposition(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const utf8Match = value.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    return decodeURIComponent(utf8Match[1]);
+  }
+
+  const asciiMatch = value.match(/filename="?([^"]+)"?/i);
+  return asciiMatch?.[1] ?? null;
+}
+
 export const monthlyFlowService = {
   async getBatches(): Promise<BatchesResponse> {
     const response = await axiosInstance.get<BatchesResponse>("/api/batches");
@@ -108,6 +127,25 @@ export const monthlyFlowService = {
     );
 
     return response.data;
+  },
+
+  async downloadMonthlyDocument(
+    documentId: number
+  ): Promise<MonthlyDocumentDownloadResponse> {
+    const response = await axiosInstance.get<Blob>(
+      `/api/monthly-documents/${documentId}/download`,
+      {
+        responseType: "blob",
+      }
+    );
+
+    return {
+      blob: response.data,
+      filename:
+        getFilenameFromContentDisposition(
+          response.headers["content-disposition"] ?? null
+        ) ?? `monthly-document-${documentId}`,
+    };
   },
 
   async uploadInitialDocument(
