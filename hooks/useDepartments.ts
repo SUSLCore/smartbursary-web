@@ -16,7 +16,8 @@ export const useDepartments = () => {
 
       setDepartments(response.data);
     } catch (error) {
-      console.error(error);
+      const err = error as { message?: string };
+      console.error(err.message ?? error);
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,4 @@
-import { isAxiosError } from "axios";
+
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 import authService from "@/services/auth.service";
@@ -22,13 +22,8 @@ export const loginUser = createAsyncThunk<
 
 		return response;
 	} catch (error) {
-		if (isAxiosError<{ message?: string }>(error)) {
-			return rejectWithValue(
-				error.response?.data?.message ?? "Login failed. Please try again.",
-			);
-		}
-
-		return rejectWithValue("Login failed. Please try again.");
+		const err = error as { message?: string };
+		return rejectWithValue(err.message ?? "Login failed. Please try again.");
 	}
 });
 
@@ -45,11 +40,8 @@ export const validateAuth = createAsyncThunk<
 
 		return response;
 	} catch (error) {
-		if (isAxiosError<{ message?: string }>(error)) {
-			return rejectWithValue(error.response?.data?.message ?? "Unauthorized");
-		}
-
-		return rejectWithValue("Unauthorized");
+		const err = error as { message?: string };
+		return rejectWithValue(err.message ?? "Unauthorized");
 	}
 });
 
@@ -66,10 +58,7 @@ export const logoutUser = createAsyncThunk<
 
 		return response;
 	} catch (error) {
-		if (isAxiosError<{ message?: string }>(error)) {
-			return rejectWithValue(error.response?.data?.message ?? "Logout failed");
-		}
-
-		return rejectWithValue("Logout failed");
+		const err = error as { message?: string };
+		return rejectWithValue(err.message ?? "Logout failed");
 	}
 });

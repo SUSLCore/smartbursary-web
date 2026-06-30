@@ -55,10 +55,11 @@ export default function StudentPage() {
           return;
         }
 
+        const err = error as { message?: string };
         setProfile(null);
         setNotice({
           tone: "error",
-          text: "Could not load the student profile right now.",
+          text: err.message ?? "Could not load the student profile right now.",
         });
       } finally {
         if (active) {

@@ -4,19 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getFaculties, type Faculty } from "@/services/admin.service";
 
-type ApiError = {
-  response?: {
-    data?: {
-      message?: string;
-    };
-  };
-};
-
-function getErrorMessage(error: unknown, fallback: string) {
-  const apiError = error as ApiError;
-  return apiError?.response?.data?.message ?? fallback;
-}
-
 export default function FacultiesPage() {
   const router = useRouter();
   const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -30,7 +17,7 @@ export default function FacultiesPage() {
         const data = await getFaculties();
         setFaculties(data);
       } catch (error: unknown) {
-        setError(getErrorMessage(error, "Failed to load faculties"));
+        setError((error as { message?: string }).message ?? "Failed to load faculties");
       } finally {
         setLoading(false);
       }
