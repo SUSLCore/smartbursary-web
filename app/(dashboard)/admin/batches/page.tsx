@@ -10,19 +10,6 @@ import {
   getBatches,
 } from "@/services/batch.service";
 
-type ApiError = {
-  response?: {
-    data?: {
-      message?: string;
-    };
-  };
-};
-
-function getErrorMessage(error: unknown, fallback: string) {
-  const apiError = error as ApiError;
-  return apiError?.response?.data?.message ?? fallback;
-}
-
 function ArrowLeftIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
@@ -78,7 +65,7 @@ export default function BatchesPage() {
       const data = await getBatches();
       setBatches(data);
     } catch (error: unknown) {
-      setError(getErrorMessage(error, "Failed to load batches"));
+      setError((error as { message?: string }).message ?? "Failed to load batches");
     } finally {
       setLoading(false);
     }
@@ -113,7 +100,7 @@ export default function BatchesPage() {
       await loadBatches();
     } catch (error: unknown) {
       setError(
-        getErrorMessage(error, "Failed to create batch")
+        (error as { message?: string }).message ?? "Failed to create batch"
       );
     } finally {
       setSubmitting(false);
@@ -139,7 +126,7 @@ export default function BatchesPage() {
       await loadBatches();
     } catch (error: unknown) {
       setError(
-        getErrorMessage(error, "Failed to delete batch")
+        (error as { message?: string }).message ?? "Failed to delete batch"
       );
     } finally {
       setDeletingId(null);

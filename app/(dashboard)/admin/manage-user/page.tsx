@@ -9,25 +9,12 @@ import {
   getUserByRegisterId,
 } from "@/services/admin.service";
 
-type ApiError = {
-  response?: {
-    data?: {
-      message?: string;
-    };
-  };
-};
-
 type NoticeTone = "success" | "error" | "info";
 
 type NoticeState = {
   tone: NoticeTone;
   text: string;
 } | null;
-
-function getErrorMessage(error: unknown, fallback: string) {
-  const apiError = error as ApiError;
-  return apiError?.response?.data?.message ?? fallback;
-}
 
 function SearchIcon() {
   return (
@@ -134,7 +121,7 @@ export default function ManageUserPage() {
       console.error(error);
       setNotice({
         tone: "error",
-        text: getErrorMessage(error, "Could not find a user for that registration ID."),
+        text: (error as { message?: string }).message ?? "Could not find a user for that registration ID.",
       });
     } finally {
       setSearching(false);
@@ -162,7 +149,7 @@ export default function ManageUserPage() {
       console.error(error);
       setNotice({
         tone: "error",
-        text: getErrorMessage(error, "Could not delete this user."),
+        text: (error as { message?: string }).message ?? "Could not delete this user.",
       });
     } finally {
       setDeleting(false);
