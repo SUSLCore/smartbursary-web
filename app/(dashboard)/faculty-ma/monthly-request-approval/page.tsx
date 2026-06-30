@@ -39,6 +39,13 @@ type NoticeState = {
   text: string;
 } | null;
 
+interface ApiError {
+  success: boolean;
+  message: string;
+  documentId?: number;
+  canDelete?: boolean;
+}
+
 const emptyNotice: NoticeState = null;
 
 const toNumber = (value: string): number | null => {
@@ -373,14 +380,29 @@ export default function MonthlyRequestFlowPage() {
           text: `${response.message}${detail}${response.canDelete ? " — You may delete the existing document to replace it." : ""}`,
         });
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+
+      const error = err as ApiError;
+
+      const detail =
+        error.documentId
+          ? ` (Document ID: ${error.documentId})`
+          : "";
+
       setUploadNotice({
-        tone: "error",
-        text: "Upload failed. Please check the file format and try again.",
+        tone: error.documentId ? "info" : "error",
+        text:
+          `${error.message ?? "Upload failed."}` +
+          detail +
+          (error.canDelete
+            ? " — You may delete the existing document to replace it."
+            : ""),
       });
+
     } finally {
+
       setUploading(false);
+
     }
   };
 
