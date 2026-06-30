@@ -167,9 +167,10 @@ export default function UploadBursaryListPage() {
         });
       } catch (error) {
         console.error(error);
+        const err = error as { message?: string };
         setStudentNotice({
           tone: "error",
-          text: "Could not load department students. Please try again.",
+          text: err.message ?? "Could not load department students. Please try again.",
         });
       } finally {
         setLoadingStudents(false);
@@ -238,9 +239,10 @@ export default function UploadBursaryListPage() {
 
         if (!active) return;
 
+        const err = error as { message?: string };
         setMetaNotice({
           tone: "error",
-          text: "Could not load batches or departments.",
+          text: err.message ?? "Could not load batches or departments.",
         });
       } finally {
         if (active) {
@@ -316,9 +318,10 @@ export default function UploadBursaryListPage() {
       });
     } catch (error) {
       console.error(error);
+      const err = error as { message?: string };
       setUploadNotice({
         tone: "error",
-        text: "The upload failed. Please check the file format and try again.",
+        text: err.message ?? "The upload failed. Please check the file format and try again.",
       });
     } finally {
       setUploading(false);
@@ -355,9 +358,10 @@ export default function UploadBursaryListPage() {
       });
     } catch (error) {
       console.error(error);
+      const err = error as { message?: string };
       setEligibilityNotice({
         tone: "error",
-        text: "Could not verify eligibility. Please try again.",
+        text: err.message ?? "Could not verify eligibility. Please try again.",
       });
     } finally {
       setChecking(false);
@@ -380,9 +384,10 @@ export default function UploadBursaryListPage() {
       });
     } catch (error) {
       console.error(error);
+      const err = error as { message?: string };
       setStudentNotice({
         tone: "error",
-        text: "Could not remove the student right now.",
+        text: err.message ?? "Could not remove the student right now.",
       });
     } finally {
       setRemovingId(null);

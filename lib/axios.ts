@@ -30,4 +30,28 @@ export const api = {
   },
 };
 
+
+axiosInstance.interceptors.response.use(
+
+    (response) => response,
+
+    (error) => {
+
+        if (axios.isAxiosError(error)) {
+
+            return Promise.reject(
+                error.response?.data ?? {
+                    success: false,
+                    message: "Unexpected server error.",
+                }
+            );
+
+        }
+
+        return Promise.reject(error);
+
+    }
+
+);
+
 export default axiosInstance;

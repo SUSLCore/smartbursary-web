@@ -190,9 +190,10 @@ export default function MonthlyPendingRequestsPanel({
           return;
         }
 
+        const err = error as { message?: string };
         setNotice({
           tone: "error",
-          text: "Could not load pending monthly requests right now.",
+          text: err.message ?? "Could not load pending monthly requests right now.",
         });
       } finally {
         if (mountedRef.current && showLoading) {
@@ -245,9 +246,10 @@ export default function MonthlyPendingRequestsPanel({
         return;
       }
 
+      const err = error as { message?: string };
       setDetailNotice({
         tone: "error",
-        text: "Could not load that monthly document right now.",
+        text: err.message ?? "Could not load that monthly document right now.",
       });
     } finally {
       if (mountedRef.current) {
@@ -291,9 +293,10 @@ export default function MonthlyPendingRequestsPanel({
       console.error(error);
 
       if (mountedRef.current) {
+        const err = error as { message?: string };
         setDetailNotice({
           tone: "error",
-          text: "Could not download that monthly document right now.",
+          text: err.message ?? "Could not download that monthly document right now.",
         });
       }
     } finally {
@@ -381,9 +384,10 @@ export default function MonthlyPendingRequestsPanel({
       console.error(error);
 
       if (mountedRef.current) {
+        const err = error as { message?: string };
         setDetailNotice({
           tone: "error",
-          text: "Could not upload that signed document right now.",
+          text: err.message ?? "Could not upload that signed document right now.",
         });
       }
     } finally {
