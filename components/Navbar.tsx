@@ -40,6 +40,7 @@ export default function Navbar() {
               src="/images/smartbursery-logo.png"
               alt="SmartBursery logo"
               fill
+              sizes="64px"
               className="object-contain p-1"
             />
           </span>
