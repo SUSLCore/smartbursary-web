@@ -9,9 +9,42 @@ import {
 	persistReducer,
 	persistStore,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage";
 
 import authReducer from "@/features/auth/authSlice";
+
+const createNoopStorage = () => ({
+	getItem: async () => null,
+	setItem: async (_key: string, value: string) => value,
+	removeItem: async () => null,
+});
+
+const createBrowserStorage = () => {
+	if (typeof window === "undefined") {
+		return createNoopStorage();
+	}
+
+	try {
+		const testKey = "redux-persist test";
+		window.localStorage.setItem(testKey, "test");
+		window.localStorage.removeItem(testKey);
+
+		return {
+			getItem: async (key: string) => window.localStorage.getItem(key),
+			setItem: async (_key: string, value: string) => {
+				window.localStorage.setItem(_key, value);
+				return value;
+			},
+			removeItem: async (_key: string) => {
+				window.localStorage.removeItem(_key);
+				return null;
+			},
+		};
+	} catch {
+		return createNoopStorage();
+	}
+};
+
+const storage = createBrowserStorage();
 
 const authPersistConfig = {
 	key: "auth",
