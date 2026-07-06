@@ -88,6 +88,12 @@ export interface MonthlyDocumentSignResponse {
   data?: MonthlyDocumentRecord;
 }
 
+export interface MonthlyDocumentReplaceResponse {
+  success: boolean;
+  message: string;
+  data?: MonthlyDocumentRecord;
+}
+
 function getFilenameFromContentDisposition(value: string | null) {
   if (!value) {
     return null;
@@ -166,6 +172,27 @@ export const monthlyFlowService = {
 
     const response = await axiosInstance.put<MonthlyDocumentSignResponse>(
       `/api/monthly-documents/${documentId}/sign`,
+      formData
+    );
+
+    return response.data;
+  },
+
+  async replaceMonthlyDocument(
+    documentId: number,
+    file: File,
+    remarks?: string
+  ): Promise<MonthlyDocumentReplaceResponse> {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    if (remarks?.trim()) {
+      formData.append("remarks", remarks.trim());
+    }
+
+    const response = await axiosInstance.put<MonthlyDocumentReplaceResponse>(
+      `/api/monthly-documents/${documentId}/replace`,
       formData
     );
 
