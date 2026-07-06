@@ -10,7 +10,7 @@ type DashboardViewProps = {
 	userType: string;
 	title: string;
 	summary: string;
-	stats: Stat[];
+	stats?: Stat[];
 	items: string[];
 };
 
@@ -18,7 +18,7 @@ export default function DashboardView({
 	userType,
 	title,
 	summary,
-	stats,
+	stats = [],
 	items,
 }: DashboardViewProps) {
 	return (
@@ -42,20 +42,22 @@ export default function DashboardView({
 				</div>
 			</section>
 
-			<section className="grid gap-4 md:grid-cols-3">
-				{stats.map((stat) => (
-					<div
-						key={stat.label}
-						className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-					>
-						<p className="text-sm font-medium text-slate-500">{stat.label}</p>
-						<p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
-							{stat.value}
-						</p>
-						<p className="mt-2 text-sm leading-6 text-slate-600">{stat.description}</p>
-					</div>
-				))}
-			</section>
+			{stats.length > 0 ? (
+				<section className="grid gap-4 md:grid-cols-3">
+					{stats.map((stat) => (
+						<div
+							key={stat.label}
+							className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+						>
+							<p className="text-sm font-medium text-slate-500">{stat.label}</p>
+							<p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+								{stat.value}
+							</p>
+							<p className="mt-2 text-sm leading-6 text-slate-600">{stat.description}</p>
+						</div>
+					))}
+				</section>
+			) : null}
 
 			<MonthlyPendingRequestsPanel />
 
