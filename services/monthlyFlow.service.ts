@@ -94,6 +94,12 @@ export interface MonthlyDocumentReplaceResponse {
   data?: MonthlyDocumentRecord;
 }
 
+export interface MonthlyDocumentRejectResponse {
+  success: boolean;
+  message: string;
+  data?: MonthlyDocumentRecord;
+}
+
 export interface MonthlyMyUploadItem {
   id: number;
   batch: number;
@@ -220,6 +226,18 @@ export const monthlyFlowService = {
     const response = await axiosInstance.put<MonthlyDocumentReplaceResponse>(
       `/api/monthly-documents/${documentId}/replace`,
       formData
+    );
+
+    return response.data;
+  },
+
+  async rejectMonthlyDocument(
+    documentId: number,
+    remarks: string
+  ): Promise<MonthlyDocumentRejectResponse> {
+    const response = await axiosInstance.put<MonthlyDocumentRejectResponse>(
+      `/api/monthly-documents/${documentId}/reject`,
+      { remarks }
     );
 
     return response.data;
