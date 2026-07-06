@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import monthlyFlowService, {
+  type MonthlyMyUploadItem,
   type MonthlyDocumentRecord,
 } from "@/services/monthlyFlow.service";
 
@@ -106,6 +107,12 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function formatMyUploadPeriod(item: MonthlyMyUploadItem) {
+  const label = monthNames[item.month - 1] ?? `Month ${item.month}`;
+
+  return `${label} ${item.year}`;
+}
+
 function getFileName(path: string) {
   return path.split("\\").pop() ?? path;
 }
@@ -149,6 +156,14 @@ export default function MonthlyPendingRequestsPanel({
     null
   );
   const [loadingDocumentId, setLoadingDocumentId] = useState<number | null>(
+    null
+  );
+  const [loadingMyUploads, setLoadingMyUploads] = useState(false);
+  const [showMyUploads, setShowMyUploads] = useState(false);
+  const [myUploads, setMyUploads] = useState<MonthlyMyUploadItem[]>([]);
+  const [myUploadsNotice, setMyUploadsNotice] =
+    useState<NoticeState>(emptyNotice);
+  const [replacingDocumentId, setReplacingDocumentId] = useState<number | null>(
     null
   );
   const [downloadingDocumentId, setDownloadingDocumentId] = useState<
@@ -308,6 +323,111 @@ export default function MonthlyPendingRequestsPanel({
     }
   };
 
+  const handleLoadMyUploads = async () => {
+    setShowMyUploads(true);
+    setLoadingMyUploads(true);
+    setMyUploadsNotice(emptyNotice);
+
+    try {
+      const response = await monthlyFlowService.getMyUploads();
+
+      if (!mountedRef.current) {
+        return;
+      }
+
+      setMyUploads(response.data ?? []);
+
+      if ((response.data ?? []).length === 0) {
+        setMyUploadsNotice({
+          tone: "info",
+          text: "You have no previous uploads yet.",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+
+      if (!mountedRef.current) {
+        return;
+      }
+
+      const err = error as { message?: string };
+      setMyUploadsNotice({
+        tone: "error",
+        text: err.message ?? "Could not load your previous uploads right now.",
+      });
+    } finally {
+      if (mountedRef.current) {
+        setLoadingMyUploads(false);
+      }
+    }
+  };
+
+  const handleOpenReplaceUpload = (
+    documentId: number,
+    event?: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event?.stopPropagation();
+
+    document.getElementById(`replace-document-input-${documentId}`)?.click();
+  };
+
+  const handleReplaceDocumentSelected = async (
+    documentId: number,
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    event.stopPropagation();
+
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setReplacingDocumentId(documentId);
+    setMyUploadsNotice(emptyNotice);
+
+    try {
+      const response = await monthlyFlowService.replaceMonthlyDocument(
+        documentId,
+        file
+      );
+
+      if (!mountedRef.current) {
+        return;
+      }
+
+      await handleLoadMyUploads();
+
+      if (mountedRef.current) {
+        setMyUploadsNotice({
+          tone: "success",
+          text:
+            response.message ??
+            `Document #${documentId} replaced successfully.`,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+
+      if (!mountedRef.current) {
+        return;
+      }
+
+      const err = error as { message?: string };
+      setMyUploadsNotice({
+        tone: "error",
+        text: err.message ?? "Could not replace that document right now.",
+      });
+    } finally {
+      if (mountedRef.current) {
+        setReplacingDocumentId((current) =>
+          current === documentId ? null : current
+        );
+      }
+    }
+  };
+
   const handleOpenSignedUpload = (
     documentId: number,
     remarks: string,
@@ -441,14 +561,20 @@ export default function MonthlyPendingRequestsPanel({
               {loading ? "..." : pendingCount}
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/40 px-4 py-3">
+          <button
+            type="button"
+            onClick={() => void handleLoadMyUploads()}
+            className="rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/40 px-4 py-3 text-left transition hover:border-[#27b8d2]/40 hover:bg-[#27b8d2]/5"
+          >
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Latest
+              Previous upload
             </p>
             <p className="mt-1 text-sm font-semibold text-[#17365d]">
-              {pendingRequests[0] ? formatMonth(pendingRequests[0]) : "No queue"}
+              {loadingMyUploads
+                ? "Loading..."
+                : "Click to load cards"}
             </p>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -459,6 +585,120 @@ export default function MonthlyPendingRequestsPanel({
           )}`}
         >
           {notice.text}
+        </div>
+      )}
+
+      {showMyUploads && (
+        <div className="mt-6 rounded-3xl border border-[#27b8d2]/20 bg-[#27b8d2]/5 p-4 sm:p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#27b8d2]">
+                My uploads
+              </p>
+              <h3 className="mt-1 text-lg font-bold text-[#17365d]">
+                Previous uploads
+              </h3>
+              <p className="mt-1 text-sm text-slate-600">
+                The response returned by the my uploads endpoint is shown below.
+              </p>
+            </div>
+            <span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 ring-1 ring-slate-200">
+              {loadingMyUploads ? "Loading..." : `${myUploads.length} record(s)`}
+            </span>
+          </div>
+
+          {myUploadsNotice && (
+            <div
+              className={`mt-4 rounded-2xl border px-4 py-3 text-sm font-medium ${noticeClassName(
+                myUploadsNotice.tone
+              )}`}
+            >
+              {myUploadsNotice.text}
+            </div>
+          )}
+
+          {!loadingMyUploads && myUploads.length > 0 && (
+            <div className="mt-4 grid gap-3">
+              {myUploads.map((item) => (
+                <div
+                  key={item.id}
+                  className="rounded-3xl border border-white bg-white p-4 shadow-sm"
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#27b8d2]">
+                        Upload #{item.id}
+                      </p>
+                      <h4 className="mt-1 text-lg font-bold text-[#17365d]">
+                        {formatMyUploadPeriod(item)}
+                      </h4>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Batch {item.batch} - Department {item.department}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                        {item.status}
+                      </span>
+                      <span className="rounded-full bg-[#17365d]/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d]">
+                        {item.currentStep.replace(/_/g, " ")}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    <DetailCard label="Document ID" value={item.id} />
+                    <DetailCard label="Batch ID" value={item.batch} />
+                    <DetailCard label="Department ID" value={item.department} />
+                    <DetailCard label="Month" value={item.month} />
+                    <DetailCard label="Year" value={item.year} />
+                  </div>
+
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    <DetailCard
+                      label="Current step"
+                      value={item.currentStep.replace(/_/g, " ")}
+                    />
+                    <DetailCard label="Waiting for" value={item.waitingFor} />
+                    <DetailCard
+                      label="Can replace"
+                      value={item.canReplace ? "Yes" : "No"}
+                    />
+                    <DetailCard label="Uploaded at" value={item.uploadedAt} />
+                    <DetailCard label="Status" value={item.status} />
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={(event) => handleOpenReplaceUpload(item.id, event)}
+                      disabled={!item.canReplace || replacingDocumentId === item.id}
+                      className="inline-flex items-center gap-2 rounded-full border border-[#27b8d2]/20 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d] transition hover:border-[#27b8d2]/40 hover:bg-[#27b8d2]/10 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <UploadIcon />
+                      {replacingDocumentId === item.id
+                        ? "Replacing..."
+                        : "Replace"}
+                    </button>
+                    <input
+                      id={`replace-document-input-${item.id}`}
+                      type="file"
+                      className="hidden"
+                      onChange={(event) =>
+                        void handleReplaceDocumentSelected(item.id, event)
+                      }
+                    />
+                    {!item.canReplace && (
+                      <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">
+                        Replacement disabled
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

@@ -94,6 +94,24 @@ export interface MonthlyDocumentReplaceResponse {
   data?: MonthlyDocumentRecord;
 }
 
+export interface MonthlyMyUploadItem {
+  id: number;
+  batch: number;
+  department: number;
+  month: number;
+  year: number;
+  currentStep: string;
+  waitingFor: string;
+  canReplace: boolean;
+  uploadedAt: number;
+  status: string;
+}
+
+export interface MonthlyMyUploadsResponse {
+  success: boolean;
+  data: MonthlyMyUploadItem[];
+}
+
 function getFilenameFromContentDisposition(value: string | null) {
   if (!value) {
     return null;
@@ -126,6 +144,14 @@ export const monthlyFlowService = {
   async getPendingRequests(): Promise<MonthlyPendingDocumentsResponse> {
     const response = await axiosInstance.get<MonthlyPendingDocumentsResponse>(
       "/api/monthly-documents/pending"
+    );
+
+    return response.data;
+  },
+
+  async getMyUploads(): Promise<MonthlyMyUploadsResponse> {
+    const response = await axiosInstance.get<MonthlyMyUploadsResponse>(
+      "/api/monthly-documents/my-uploads"
     );
 
     return response.data;
