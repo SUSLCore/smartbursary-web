@@ -88,6 +88,36 @@ export interface MonthlyDocumentSignResponse {
   data?: MonthlyDocumentRecord;
 }
 
+export interface MonthlyDocumentReplaceResponse {
+  success: boolean;
+  message: string;
+  data?: MonthlyDocumentRecord;
+}
+
+export interface MonthlyDocumentRejectResponse {
+  success: boolean;
+  message: string;
+  data?: MonthlyDocumentRecord;
+}
+
+export interface MonthlyMyUploadItem {
+  id: number;
+  batch: number;
+  department: number;
+  month: number;
+  year: number;
+  currentStep: string;
+  waitingFor: string;
+  canReplace: boolean;
+  uploadedAt: number;
+  status: string;
+}
+
+export interface MonthlyMyUploadsResponse {
+  success: boolean;
+  data: MonthlyMyUploadItem[];
+}
+
 function getFilenameFromContentDisposition(value: string | null) {
   if (!value) {
     return null;
@@ -120,6 +150,14 @@ export const monthlyFlowService = {
   async getPendingRequests(): Promise<MonthlyPendingDocumentsResponse> {
     const response = await axiosInstance.get<MonthlyPendingDocumentsResponse>(
       "/api/monthly-documents/pending"
+    );
+
+    return response.data;
+  },
+
+  async getMyUploads(): Promise<MonthlyMyUploadsResponse> {
+    const response = await axiosInstance.get<MonthlyMyUploadsResponse>(
+      "/api/monthly-documents/my-uploads"
     );
 
     return response.data;
@@ -167,6 +205,39 @@ export const monthlyFlowService = {
     const response = await axiosInstance.put<MonthlyDocumentSignResponse>(
       `/api/monthly-documents/${documentId}/sign`,
       formData
+    );
+
+    return response.data;
+  },
+
+  async replaceMonthlyDocument(
+    documentId: number,
+    file: File,
+    remarks?: string
+  ): Promise<MonthlyDocumentReplaceResponse> {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    if (remarks?.trim()) {
+      formData.append("remarks", remarks.trim());
+    }
+
+    const response = await axiosInstance.put<MonthlyDocumentReplaceResponse>(
+      `/api/monthly-documents/${documentId}/replace`,
+      formData
+    );
+
+    return response.data;
+  },
+
+  async rejectMonthlyDocument(
+    documentId: number,
+    remarks: string
+  ): Promise<MonthlyDocumentRejectResponse> {
+    const response = await axiosInstance.put<MonthlyDocumentRejectResponse>(
+      `/api/monthly-documents/${documentId}/reject`,
+      { remarks }
     );
 
     return response.data;

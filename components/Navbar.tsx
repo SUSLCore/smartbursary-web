@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-
-import ConfirmationCard from "@/components/ConfirmationCard";
 import { logoutUser } from "@/features/auth/authThunk";
 import { AppDispatch } from "@/redux/store";
 
@@ -39,9 +37,9 @@ export default function Navbar() {
             <Image
               src="/images/smartbursery-logo.png"
               alt="SmartBursery logo"
-              fill
-              sizes="64px"
-              className="object-contain p-1"
+              width={64}
+              height={64}
+              className="h-auto w-auto object-contain"
             />
           </span>
           <div className="leading-tight">
