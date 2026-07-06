@@ -117,6 +117,10 @@ function getFileName(path: string) {
   return path.split("\\").pop() ?? path;
 }
 
+function isXlsxFile(file: File) {
+  return file.name.toLowerCase().endsWith(".xlsx");
+}
+
 function DetailCard({
   label,
   value,
@@ -384,6 +388,14 @@ export default function MonthlyPendingRequestsPanel({
       return;
     }
 
+    if (!isXlsxFile(file)) {
+      setMyUploadsNotice({
+        tone: "error",
+        text: "Only .xlsx files are allowed for document replacement.",
+      });
+      return;
+    }
+
     setReplacingDocumentId(documentId);
     setMyUploadsNotice(emptyNotice);
 
@@ -437,7 +449,7 @@ export default function MonthlyPendingRequestsPanel({
 
     if (!remarks.trim()) {
       setDetailNotice({
-        tone: "info",
+        tone: "error",
         text: "Please add remarks before uploading the signed document.",
       });
       return;
@@ -459,11 +471,19 @@ export default function MonthlyPendingRequestsPanel({
       return;
     }
 
+    if (!isXlsxFile(file)) {
+      setDetailNotice({
+        tone: "error",
+        text: "Only .xlsx files are allowed for signed document upload.",
+      });
+      return;
+    }
+
     const remarks = signedRemarksById[documentId]?.trim();
 
     if (!remarks) {
       setDetailNotice({
-        tone: "info",
+        tone: "error",
         text: "Please add remarks before uploading the signed document.",
       });
       return;
@@ -674,7 +694,7 @@ export default function MonthlyPendingRequestsPanel({
                       type="button"
                       onClick={(event) => handleOpenReplaceUpload(item.id, event)}
                       disabled={!item.canReplace || replacingDocumentId === item.id}
-                      className="inline-flex items-center gap-2 rounded-full border border-[#27b8d2]/20 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d] transition hover:border-[#27b8d2]/40 hover:bg-[#27b8d2]/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <UploadIcon />
                       {replacingDocumentId === item.id
@@ -684,6 +704,7 @@ export default function MonthlyPendingRequestsPanel({
                     <input
                       id={`replace-document-input-${item.id}`}
                       type="file"
+                      accept=".xlsx"
                       className="hidden"
                       onChange={(event) =>
                         void handleReplaceDocumentSelected(item.id, event)
@@ -806,7 +827,7 @@ export default function MonthlyPendingRequestsPanel({
                     type="button"
                     onClick={(event) => void handleDownloadDocument(record.id, event)}
                     disabled={downloadingDocumentId === record.id}
-                    className="ml-auto inline-flex items-center gap-2 rounded-full border border-[#27b8d2]/20 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d] transition hover:border-[#27b8d2]/40 hover:bg-[#27b8d2]/10 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="ml-auto inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 transition hover:border-blue-300 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     <DownloadIcon />
                     {downloadingDocumentId === record.id ? "Downloading..." : "Download"}
@@ -831,6 +852,7 @@ export default function MonthlyPendingRequestsPanel({
                   <input
                     id={`signed-document-input-${record.id}`}
                     type="file"
+                    accept=".xlsx"
                     className="hidden"
                     onChange={(event) =>
                       void handleSignedDocumentSelected(record.id, event)
