@@ -59,6 +59,31 @@ function SearchUserIcon() {
   );
 }
 
+function FileIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+      <path
+        d="M7 3.5h6.5L18.5 8V20.5H7V3.5Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.5 3.5V8H18.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9.5 12h5M9.5 15h5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function ArrowIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
@@ -71,22 +96,52 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#e9ebf2]">
-      <div className="mx-auto max-w-6xl px-6 py-12 sm:px-8">
-        <div className="max-w-2xl">
-          <span className="inline-flex items-center gap-2 rounded-full bg-[#27b8d2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#27b8d2]" />
-            Admin Control
-          </span>
-          <h1 className="mt-4 text-3xl font-bold text-[#17365d] sm:text-4xl">
-            Admin Dashboard
-          </h1>
-          <p className="mt-2 text-sm text-slate-600 sm:text-base">
-            Manage batches first, then move into the officer workflows for student services and faculties.
-          </p>
-        </div>
+    <div className="relative min-h-screen overflow-hidden bg-[#e9ebf2]">
+      <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#27b8d2]/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-[#17365d]/10 blur-3xl" />
 
-        <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mx-auto max-w-6xl px-6 py-12 sm:px-8">
+        <section className="relative overflow-hidden rounded-[32px] border border-white/70 bg-white/80 p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur sm:p-10">
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#27b8d2] via-[#17365d] to-[#27b8d2]" />
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-2 rounded-full bg-[#27b8d2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#27b8d2]" />
+                Admin Control
+              </span>
+              <h1 className="mt-4 text-3xl font-bold text-[#17365d] sm:text-4xl">
+                Admin Dashboard
+              </h1>
+              <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
+                Central command for setup, officer workflows, account lookups,
+                and monthly document management.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[420px]">
+              <div className="rounded-2xl bg-[#17365d] px-4 py-4 text-white shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#27b8d2]">
+                  Area
+                </p>
+                <p className="mt-1 text-lg font-bold">5 modules</p>
+              </div>
+              <div className="rounded-2xl bg-[#27b8d2]/10 px-4 py-4 text-[#17365d] shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#27b8d2]">
+                  Focus
+                </p>
+                <p className="mt-1 text-lg font-bold">Admin operations</p>
+              </div>
+              <div className="rounded-2xl bg-white px-4 py-4 text-[#17365d] shadow-sm ring-1 ring-slate-200">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Routing
+                </p>
+                <p className="mt-1 text-lg font-bold">Fast access</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-5">
           <button
             onClick={() => router.push("/admin/batches")}
             className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-8 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#27b8d2]/40 hover:shadow-xl hover:shadow-[#27b8d2]/15"
@@ -169,6 +224,28 @@ export default function AdminDashboard() {
             </h2>
             <p className="mt-2 text-sm text-slate-600">
               Search a user quickly by registration ID and review their account details.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#17365d] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              Open <ArrowIcon />
+            </span>
+          </button>
+
+          <button
+            onClick={() => router.push("/admin/manage-documents")}
+            className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-8 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#27b8d2]/40 hover:shadow-xl hover:shadow-[#27b8d2]/15"
+          >
+            <span className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-[#27b8d2] to-[#17365d] transition-transform duration-300 group-hover:scale-x-100" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#27b8d2]/10 text-[#27b8d2] transition-colors duration-300 group-hover:bg-[#27b8d2] group-hover:text-white">
+              <FileIcon />
+            </div>
+            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#27b8d2]">
+              Documents
+            </p>
+            <h2 className="mt-2 text-xl font-semibold text-[#17365d]">
+              Manage Documents
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Review and delete monthly document records from the admin API.
             </p>
             <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#17365d] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
               Open <ArrowIcon />
