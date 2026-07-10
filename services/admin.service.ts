@@ -31,6 +31,50 @@ export interface Department {
   facultyId: number;
 }
 
+export interface MonthlyDocumentBatch {
+  id: number;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MonthlyDocumentDepartment {
+  id: number;
+  facultyId: number;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MonthlyDocumentUser {
+  id: number;
+  name: string;
+  registerId: string;
+}
+
+export interface MonthlyDocumentRecord {
+  id: number;
+  batchId: number;
+  departmentId: number;
+  uploadedBy: number;
+  month: number;
+  year: number;
+  originalFile: string;
+  currentFile: string;
+  currentStep: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  Batch: MonthlyDocumentBatch;
+  Department: MonthlyDocumentDepartment;
+  User: MonthlyDocumentUser;
+}
+
+export interface MonthlyDocumentsResponse {
+  success: boolean;
+  data: MonthlyDocumentRecord[];
+}
+
 export interface AdminUserLookupResponse {
   success?: boolean;
   message?: string;
@@ -85,6 +129,24 @@ export const deleteUserByRegisterId = async (
 ): Promise<AdminActionResponse> => {
   const { data } = await axiosInstance.delete<AdminActionResponse>(
     `/api/admin/users/${encodeURIComponent(registerId)}`
+  );
+
+  return data;
+};
+
+export const getMonthlyDocuments = async (): Promise<MonthlyDocumentsResponse> => {
+  const { data } = await axiosInstance.get<MonthlyDocumentsResponse>(
+    "/api/admin/monthly-documents"
+  );
+
+  return data;
+};
+
+export const deleteMonthlyDocument = async (
+  documentId: number
+): Promise<AdminActionResponse> => {
+  const { data } = await axiosInstance.delete<AdminActionResponse>(
+    `/api/admin/monthly-documents/${documentId}`
   );
 
   return data;
@@ -170,6 +232,8 @@ const adminService = {
   getDepartmentsByFaculty,
   getUserByRegisterId,
   deleteUserByRegisterId,
+  getMonthlyDocuments,
+  deleteMonthlyDocument,
 
   createSAR,
 
