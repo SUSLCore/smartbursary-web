@@ -83,26 +83,6 @@ function UserIcon() {
   );
 }
 
-function ShieldIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-      <path
-        d="M12 3 19 6v5c0 4.4-3 8.1-7 10-4-1.9-7-5.6-7-10V6l7-3Z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-      />
-      <path
-        d="m9.5 12 1.9 1.9 3.5-4"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 function ArrowLeftIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
@@ -377,39 +357,14 @@ export default function ManageUserPage() {
                       </p>
                     </div>
 
-                    <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        Faculty ID
-                      </p>
-                      <p className="mt-2 text-base font-semibold text-slate-900">
-                        {user.FacultyId ?? "-"}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        Department ID
-                      </p>
-                      <p className="mt-2 text-base font-semibold text-slate-900">
-                        {user.DepartmentId ?? "-"}
-                      </p>
-                    </div>
                   </div>
 
                   <div className="border-t border-slate-200 bg-white px-5 py-4">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <ShieldIcon />
-                        <span>
-                          The backend controls which fields are returned. If a
-                          field is missing, we display a safe fallback.
-                        </span>
-                      </div>
-
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
                       <button
                         type="button"
                         onClick={() => setConfirmDeleteOpen(true)}
-                        className="inline-flex items-center justify-center rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-500"
+                        className="inline-flex w-full items-center justify-center rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-500 sm:w-auto"
                       >
                         Delete user
                       </button>
