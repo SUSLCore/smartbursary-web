@@ -952,7 +952,11 @@ export default function MonthlyRequestFlowPage() {
                       Created at
                     </p>
                     <p className="mt-1 break-all text-sm font-semibold text-[#17365d]">
-                      {formatDate(record.createdAt)}
+                      {new Intl.DateTimeFormat("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }).format(new Date(record.createdAt))}
                     </p>
                   </div>
                   <div className="rounded-2xl border border-white bg-white px-4 py-3">
@@ -960,7 +964,11 @@ export default function MonthlyRequestFlowPage() {
                       Updated at
                     </p>
                     <p className="mt-1 break-all text-sm font-semibold text-[#17365d]">
-                      {formatDate(record.updatedAt)}
+                      {new Intl.DateTimeFormat("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }).format(new Date(record.updatedAt))}
                     </p>
                   </div>
                 </div>
