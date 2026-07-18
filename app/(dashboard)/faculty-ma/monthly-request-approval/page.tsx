@@ -287,6 +287,9 @@ export default function MonthlyRequestFlowPage() {
   const [downloadingPendingId, setDownloadingPendingId] = useState<
     number | null
   >(null);
+  const [completingPendingId, setCompletingPendingId] = useState<number | null>(
+    null
+  );
   const [returningPendingId, setReturningPendingId] = useState<number | null>(
     null
   );
@@ -520,6 +523,44 @@ export default function MonthlyRequestFlowPage() {
       });
     } finally {
       setDownloadingPendingId((current) => (current === documentId ? null : current));
+    }
+  };
+
+  const handleCompletePendingDocument = async (documentId: number) => {
+    setCompletingPendingId(documentId);
+    setPendingNotice(emptyNotice);
+
+    try {
+      const response = await monthlyFlowService.completeMonthlyDocument(
+        documentId
+      );
+
+      setPendingDocuments((current) =>
+        current.filter((document) => document.id !== documentId)
+      );
+
+      setReturnRemarksById((current) => {
+        const next = { ...current };
+        delete next[documentId];
+        return next;
+      });
+
+      setPendingNotice({
+        tone: "success",
+        text:
+          response.message ??
+          `Document #${documentId} marked as complete successfully.`,
+      });
+    } catch (err) {
+      console.error(err);
+      setPendingNotice({
+        tone: "error",
+        text: "Could not mark that document as complete right now.",
+      });
+    } finally {
+      setCompletingPendingId((current) =>
+        current === documentId ? null : current
+      );
     }
   };
 
@@ -973,9 +1014,9 @@ export default function MonthlyRequestFlowPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-                  <label className="block text-sm font-medium text-[#17365d]">
-                    Return remarks
+                  <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                    <label className="block text-sm font-medium text-[#17365d]">
+                      Return remarks
                     <textarea
                       value={returnRemarksById[record.id] ?? ""}
                       onChange={(event) =>
@@ -1001,6 +1042,18 @@ export default function MonthlyRequestFlowPage() {
                       {downloadingPendingId === record.id
                         ? "Downloading..."
                         : "Download"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => void handleCompletePendingDocument(record.id)}
+                      disabled={completingPendingId === record.id}
+                      className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      <CheckCircleIcon />
+                      {completingPendingId === record.id
+                        ? "Completing..."
+                        : "Mark complete"}
                     </button>
 
                     <button
