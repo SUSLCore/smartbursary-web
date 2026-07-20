@@ -100,6 +100,21 @@ export interface MonthlyDocumentRejectResponse {
   data?: MonthlyDocumentRecord;
 }
 
+export interface MonthlyDocumentReturnResponse {
+  success: boolean;
+  message: string;
+  data?: MonthlyDocumentRecord;
+}
+
+export interface MonthlyDocumentCompleteResponse {
+  success: boolean;
+  message: string;
+  data?: Pick<
+    MonthlyDocumentRecord,
+    "id" | "status" | "currentStep" | "month" | "year"
+  >;
+}
+
 export interface MonthlyMyUploadItem {
   id: number;
   batch: number;
@@ -238,6 +253,28 @@ export const monthlyFlowService = {
     const response = await axiosInstance.put<MonthlyDocumentRejectResponse>(
       `/api/monthly-documents/${documentId}/reject`,
       { remarks }
+    );
+
+    return response.data;
+  },
+
+  async returnMonthlyDocument(
+    documentId: number,
+    remarks: string
+  ): Promise<MonthlyDocumentReturnResponse> {
+    const response = await axiosInstance.put<MonthlyDocumentReturnResponse>(
+      `/api/monthly-documents/${documentId}/return`,
+      { remarks }
+    );
+
+    return response.data;
+  },
+
+  async completeMonthlyDocument(
+    documentId: number
+  ): Promise<MonthlyDocumentCompleteResponse> {
+    const response = await axiosInstance.put<MonthlyDocumentCompleteResponse>(
+      `/api/monthly-documents/${documentId}/complete`
     );
 
     return response.data;
