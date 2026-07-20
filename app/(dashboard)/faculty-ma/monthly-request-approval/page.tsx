@@ -32,6 +32,18 @@ const YEAR_OPTIONS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - 2 + i);
 
 /* ─── Small helper types ─────────────────────────────── */
 
+function formatMonth(record: MonthlyDocumentRecord) {
+  const label =
+    MONTHS.find((month) => month.value === record.month)?.label ??
+    `Month ${record.month}`;
+
+  return `${label} ${record.year}`;
+}
+
+function getFileName(path: string) {
+  return path.split("\\").pop() ?? path;
+}
+
 type NoticeTone = "success" | "error" | "info";
 
 type NoticeState = {

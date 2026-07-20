@@ -1,5 +1,4 @@
 import Link from "next/link";
-import MonthlyPendingRequestsPanel from "@/components/MonthlyPendingRequestsPanel";
 
 const features = [
   {
@@ -52,15 +51,10 @@ export default function FacultyMADashboard() {
           </p>
         </div>
 
-        <div className="mt-8">
-          <MonthlyPendingRequestsPanel variant="featured" />
-        </div>
-
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
           {features.map((feature, index) => (
-            <Link
+            <article
               key={feature.title}
-              href={feature.href}
               className="group relative overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white p-7 shadow-sm shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-[#27b8d2]/40 hover:shadow-xl hover:shadow-[#27b8d2]/15 sm:p-8"
             >
               <div
@@ -94,17 +88,20 @@ export default function FacultyMADashboard() {
                 </p>
 
                 <div className="mt-7 flex items-center justify-between border-t border-slate-100 pt-5">
-                  <span className="text-sm font-bold text-[#17365d]">
-                    Open workflow
-                  </span>
-                  <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${feature.accent} text-white shadow-md transition group-hover:translate-x-1`}
+                  <Link
+                    href={feature.href}
+                    className="inline-flex items-center gap-2 text-sm font-bold text-[#17365d]"
                   >
-                    <ArrowIcon />
-                  </span>
+                    Open workflow
+                    <span
+                      className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${feature.accent} text-white shadow-md transition group-hover:translate-x-1`}
+                    >
+                      <ArrowIcon />
+                    </span>
+                  </Link>
                 </div>
               </div>
-            </Link>
+            </article>
           ))}
         </div>
       </div>
