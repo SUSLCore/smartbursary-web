@@ -1,10 +1,36 @@
 "use client";
 
+import Link from "next/link";
+
 import OfficerForm from "@/components/OfficerForm";
+
+function ArrowLeftIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+      <path
+        d="M19 12H5M11 18l-6-6 6-6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function StudentServicesPage() {
   return (
     <div className="min-h-[calc(100vh-72px)] bg-[#eef2f7] px-4 py-8 sm:px-6 lg:px-10">
+      <div className="mx-auto mb-5 flex w-full max-w-6xl justify-start">
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-2 rounded-full border border-[#17365d]/15 bg-white px-4 py-2 text-sm font-medium text-[#17365d] shadow-sm transition-all duration-200 hover:border-[#27b8d2]/50 hover:bg-[#27b8d2]/5"
+        >
+          <ArrowLeftIcon />
+          Back to admin panel
+        </Link>
+      </div>
+
       <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
         <section className="relative overflow-hidden rounded-[32px] bg-[#17365d] p-8 text-white shadow-[0_14px_35px_rgba(23,54,93,0.24)]">
           <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[#27b8d2]/20" />

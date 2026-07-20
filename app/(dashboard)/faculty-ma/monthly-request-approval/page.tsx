@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import type { Batch } from "@/types/batch.types";
 import type { Department } from "@/types/department.types";
@@ -31,6 +31,18 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - 2 + i);
 
 /* ─── Small helper types ─────────────────────────────── */
+
+function formatMonth(record: MonthlyDocumentRecord) {
+  const label =
+    MONTHS.find((month) => month.value === record.month)?.label ??
+    `Month ${record.month}`;
+
+  return `${label} ${record.year}`;
+}
+
+function getFileName(path: string) {
+  return path.split("\\").pop() ?? path;
+}
 
 type NoticeTone = "success" | "error" | "info";
 
@@ -98,6 +110,40 @@ function UploadCloudIcon() {
         strokeWidth="1.6"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+      <path
+        d="M12 3v10m0 0 4-4m-4 4-4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ReturnIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+      <path
+        d="M7 7h9a4 4 0 0 1 4 4v6M7 7l3-3M7 7l3 3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6 17h10"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -245,6 +291,23 @@ export default function MonthlyRequestFlowPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loadingMeta, setLoadingMeta] = useState(true);
   const [metaNotice, setMetaNotice] = useState<NoticeState>(emptyNotice);
+  const [pendingDocuments, setPendingDocuments] = useState<MonthlyDocumentRecord[]>(
+    []
+  );
+  const [pendingLoading, setPendingLoading] = useState(true);
+  const [pendingNotice, setPendingNotice] = useState<NoticeState>(emptyNotice);
+  const [downloadingPendingId, setDownloadingPendingId] = useState<
+    number | null
+  >(null);
+  const [completingPendingId, setCompletingPendingId] = useState<number | null>(
+    null
+  );
+  const [returningPendingId, setReturningPendingId] = useState<number | null>(
+    null
+  );
+  const [returnRemarksById, setReturnRemarksById] = useState<
+    Record<number, string>
+  >({});
 
   /* Form fields */
   const [selectedBatchId, setSelectedBatchId] = useState("");
@@ -269,6 +332,35 @@ export default function MonthlyRequestFlowPage() {
   );
   const selectedMonthLabel =
     MONTHS.find((m) => String(m.value) === selectedMonth)?.label ?? "—";
+
+  const loadPendingDocuments = useCallback(
+    async (options?: { showLoading?: boolean }) => {
+      const showLoading = options?.showLoading ?? false;
+
+      try {
+        if (showLoading) {
+          setPendingLoading(true);
+        }
+
+        setPendingNotice(emptyNotice);
+
+        const response = await monthlyFlowService.getPendingRequests();
+
+        setPendingDocuments(response.data ?? []);
+      } catch (err) {
+        console.error(err);
+        setPendingNotice({
+          tone: "error",
+          text: "Could not load pending monthly files right now.",
+        });
+      } finally {
+        if (showLoading) {
+          setPendingLoading(false);
+        }
+      }
+    },
+    []
+  );
 
   /* Load batches + departments on mount */
   useEffect(() => {
@@ -326,6 +418,10 @@ export default function MonthlyRequestFlowPage() {
     };
   }, []);
 
+  useEffect(() => {
+    void loadPendingDocuments({ showLoading: true });
+  }, [loadPendingDocuments]);
+
   /* Upload handler */
   const handleUpload = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -369,6 +465,7 @@ export default function MonthlyRequestFlowPage() {
         setUploadNotice({ tone: "success", text: response.message });
         /* Reset file input */
         setFile(null);
+        void loadPendingDocuments();
       } else {
         /* Duplicate-document scenario */
         const detail =
@@ -403,6 +500,123 @@ export default function MonthlyRequestFlowPage() {
 
       setUploading(false);
 
+    }
+  };
+
+  const handleDownloadPendingDocument = async (documentId: number) => {
+    setDownloadingPendingId(documentId);
+    setPendingNotice(emptyNotice);
+
+    try {
+      const { blob, filename } =
+        await monthlyFlowService.downloadMonthlyDocument(documentId);
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+
+      anchor.href = url;
+      anchor.download =
+        filename.endsWith(".xlsx") || filename.endsWith(".xls")
+          ? filename
+          : `${filename}.xlsx`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(url);
+
+      setPendingNotice({
+        tone: "success",
+        text: `Download started for document #${documentId}.`,
+      });
+    } catch (err) {
+      console.error(err);
+      setPendingNotice({
+        tone: "error",
+        text: "Could not download that pending file right now.",
+      });
+    } finally {
+      setDownloadingPendingId((current) => (current === documentId ? null : current));
+    }
+  };
+
+  const handleCompletePendingDocument = async (documentId: number) => {
+    setCompletingPendingId(documentId);
+    setPendingNotice(emptyNotice);
+
+    try {
+      const response = await monthlyFlowService.completeMonthlyDocument(
+        documentId
+      );
+
+      setPendingDocuments((current) =>
+        current.filter((document) => document.id !== documentId)
+      );
+
+      setReturnRemarksById((current) => {
+        const next = { ...current };
+        delete next[documentId];
+        return next;
+      });
+
+      setPendingNotice({
+        tone: "success",
+        text:
+          response.message ??
+          `Document #${documentId} marked as complete successfully.`,
+      });
+    } catch (err) {
+      console.error(err);
+      setPendingNotice({
+        tone: "error",
+        text: "Could not mark that document as complete right now.",
+      });
+    } finally {
+      setCompletingPendingId((current) =>
+        current === documentId ? null : current
+      );
+    }
+  };
+
+  const handleReturnPendingDocument = async (documentId: number) => {
+    const remarks = returnRemarksById[documentId]?.trim();
+
+    if (!remarks) {
+      setPendingNotice({
+        tone: "error",
+        text: "Please add return remarks before sending the file back.",
+      });
+      return;
+    }
+
+    setReturningPendingId(documentId);
+    setPendingNotice(emptyNotice);
+
+    try {
+      const response = await monthlyFlowService.returnMonthlyDocument(
+        documentId,
+        remarks
+      );
+
+      setPendingNotice({
+        tone: "success",
+        text: response.message ?? `Document #${documentId} returned successfully.`,
+      });
+
+      setReturnRemarksById((current) => ({
+        ...current,
+        [documentId]: "",
+      }));
+
+      await loadPendingDocuments();
+    } catch (err) {
+      console.error(err);
+      setPendingNotice({
+        tone: "error",
+        text: "Could not return that file right now.",
+      });
+    } finally {
+      setReturningPendingId((current) =>
+        current === documentId ? null : current
+      );
     }
   };
 
@@ -651,6 +865,232 @@ export default function MonthlyRequestFlowPage() {
         {/* Upload result card */}
         {uploadedDoc && <ResultCard doc={uploadedDoc} />}
       </form>
+
+      <section className={panelClassName}>
+        {accentBar}
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#27b8d2]">
+              Step 2
+            </span>
+            <h2 className="mt-1 text-xl font-semibold text-[#17365d]">
+              Pending monthly files
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Review the files currently waiting in the monthly queue. You can
+              download a copy for inspection or return the file with remarks.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => void loadPendingDocuments({ showLoading: true })}
+            className="inline-flex w-fit items-center gap-2 rounded-full border border-[#17365d]/15 bg-white px-4 py-2 text-sm font-medium text-[#17365d] shadow-sm transition hover:border-[#27b8d2]/50 hover:bg-[#27b8d2]/5"
+          >
+            Refresh queue
+          </button>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/40 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Pending files
+            </p>
+            <p className="mt-1 text-2xl font-bold text-[#17365d]">
+              {pendingLoading ? "..." : pendingDocuments.length}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/40 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Current action
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[#17365d]">
+              Download or return
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-200/70 bg-[#e9ebf2]/40 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Status
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[#17365d]">
+              Awaiting review
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <Notice state={pendingNotice} />
+        </div>
+
+        {pendingLoading ? (
+          <div className="mt-6 grid gap-3">
+            <div className="h-28 rounded-3xl bg-slate-100" />
+            <div className="h-28 rounded-3xl bg-slate-100" />
+            <div className="h-28 rounded-3xl bg-slate-100" />
+          </div>
+        ) : pendingDocuments.length === 0 ? (
+          <div className="mt-6 rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-sm text-slate-600">
+            No pending monthly files are waiting right now.
+          </div>
+        ) : (
+          <div className="mt-6 space-y-4">
+            {pendingDocuments.map((record) => (
+              <article
+                key={record.id}
+                className="rounded-3xl border border-slate-200/70 bg-slate-50 p-4 sm:p-5"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#27b8d2]">
+                      Pending document #{record.id}
+                    </p>
+                    <h3 className="mt-1 text-lg font-bold text-[#17365d]">
+                      {formatMonth(record)}
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-600">
+                      {record.User?.name ?? `User ${record.uploadedBy}`} ·{" "}
+                      {record.Department?.name ?? `Department ${record.departmentId}`}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 ring-1 ring-slate-200">
+                      {record.status}
+                    </span>
+                    <span className="rounded-full bg-[#17365d]/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#17365d]">
+                      {record.currentStep.replace(/_/g, " ")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-2xl border border-white bg-white px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Uploaded by
+                    </p>
+                    <p className="mt-1 break-all text-sm font-semibold text-[#17365d]">
+                      {record.User?.name ?? `User ${record.uploadedBy}`}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white bg-white px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Batch
+                    </p>
+                    <p className="mt-1 break-all text-sm font-semibold text-[#17365d]">
+                      {record.Batch?.name ?? record.batchId}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white bg-white px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Department
+                    </p>
+                    <p className="mt-1 break-all text-sm font-semibold text-[#17365d]">
+                      {record.Department?.name ?? record.departmentId}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white bg-white px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      File
+                    </p>
+                    <p className="mt-1 break-all text-sm font-semibold text-[#17365d]">
+                      {getFileName(record.currentFile)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white bg-white px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Created at
+                    </p>
+                    <p className="mt-1 break-all text-sm font-semibold text-[#17365d]">
+                      {new Intl.DateTimeFormat("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }).format(new Date(record.createdAt))}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white bg-white px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Updated at
+                    </p>
+                    <p className="mt-1 break-all text-sm font-semibold text-[#17365d]">
+                      {new Intl.DateTimeFormat("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }).format(new Date(record.updatedAt))}
+                    </p>
+                  </div>
+                </div>
+
+                  <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                    <label className="block text-sm font-medium text-[#17365d]">
+                      Return remarks
+                    <textarea
+                      value={returnRemarksById[record.id] ?? ""}
+                      onChange={(event) =>
+                        setReturnRemarksById((current) => ({
+                          ...current,
+                          [record.id]: event.target.value,
+                        }))
+                      }
+                      placeholder="Add a short reason for returning this file."
+                      rows={3}
+                      className="mt-2 w-full resize-y rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#27b8d2] focus:ring-4 focus:ring-[#27b8d2]/10"
+                    />
+                  </label>
+
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void handleDownloadPendingDocument(record.id)}
+                      disabled={downloadingPendingId === record.id}
+                      className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 transition hover:border-blue-300 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      <DownloadIcon />
+                      {downloadingPendingId === record.id
+                        ? "Downloading..."
+                        : "Download"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => void handleCompletePendingDocument(record.id)}
+                      disabled={completingPendingId === record.id}
+                      className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      <CheckCircleIcon />
+                      {completingPendingId === record.id
+                        ? "Completing..."
+                        : "Mark complete"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => void handleReturnPendingDocument(record.id)}
+                      disabled={returningPendingId === record.id}
+                      className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-amber-700 transition hover:border-amber-300 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      <ReturnIcon />
+                      {returningPendingId === record.id
+                        ? "Returning..."
+                        : "Return"}
+                    </button>
+
+                    <p className="text-xs text-slate-500">
+                      The return action sends the file back with the remarks you
+                      entered above.
+                    </p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

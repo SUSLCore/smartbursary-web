@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
 import ConfirmationCard from "@/components/ConfirmationCard";
@@ -15,6 +16,38 @@ type NoticeState = {
   tone: NoticeTone;
   text: string;
 } | null;
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (typeof error !== "object" || error === null) {
+    return fallback;
+  }
+
+  const candidate = error as {
+    message?: unknown;
+    error?: unknown;
+    response?: { data?: { message?: unknown; error?: unknown } };
+  };
+
+  if (typeof candidate.message === "string" && candidate.message.trim()) {
+    return candidate.message;
+  }
+
+  if (typeof candidate.error === "string" && candidate.error.trim()) {
+    return candidate.error;
+  }
+
+  const responseMessage = candidate.response?.data?.message;
+  if (typeof responseMessage === "string" && responseMessage.trim()) {
+    return responseMessage;
+  }
+
+  const responseError = candidate.response?.data?.error;
+  if (typeof responseError === "string" && responseError.trim()) {
+    return responseError;
+  }
+
+  return fallback;
+}
 
 function SearchIcon() {
   return (
@@ -50,19 +83,13 @@ function UserIcon() {
   );
 }
 
-function ShieldIcon() {
+function ArrowLeftIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
       <path
-        d="M12 3 19 6v5c0 4.4-3 8.1-7 10-4-1.9-7-5.6-7-10V6l7-3Z"
+        d="M19 12H5M11 18l-6-6 6-6"
         stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-      />
-      <path
-        d="m9.5 12 1.9 1.9 3.5-4"
-        stroke="currentColor"
-        strokeWidth="1.7"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -118,10 +145,12 @@ export default function ManageUserPage() {
         text: `User found for registration ID ${trimmedRegisterId}.`,
       });
     } catch (error: unknown) {
-      console.error(error);
       setNotice({
         tone: "error",
-        text: (error as { message?: string }).message ?? "Could not find a user for that registration ID.",
+        text: getErrorMessage(
+          error,
+          "Could not find a user for that registration ID."
+        ),
       });
     } finally {
       setSearching(false);
@@ -146,10 +175,9 @@ export default function ManageUserPage() {
       setUser(null);
       setConfirmDeleteOpen(false);
     } catch (error: unknown) {
-      console.error(error);
       setNotice({
         tone: "error",
-        text: (error as { message?: string }).message ?? "Could not delete this user.",
+        text: getErrorMessage(error, "Could not delete this user."),
       });
     } finally {
       setDeleting(false);
@@ -158,6 +186,16 @@ export default function ManageUserPage() {
 
   return (
     <div className="min-h-[calc(100vh-72px)] bg-[#eef2f7] px-4 py-8 sm:px-6 lg:px-10">
+      <div className="mx-auto mb-5 flex w-full max-w-6xl justify-start">
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-2 rounded-full border border-[#17365d]/15 bg-white px-4 py-2 text-sm font-medium text-[#17365d] shadow-sm transition-all duration-200 hover:border-[#27b8d2]/50 hover:bg-[#27b8d2]/5"
+        >
+          <ArrowLeftIcon />
+          Back to admin panel
+        </Link>
+      </div>
+
       <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
         <section className="relative overflow-hidden rounded-[32px] bg-[#17365d] p-8 text-white shadow-[0_14px_35px_rgba(23,54,93,0.24)]">
           <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[#27b8d2]/20" />
@@ -205,11 +243,8 @@ export default function ManageUserPage() {
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Enter a registration ID to fetch the matching account from
-              <code className="mx-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-700">
-                /api/admin/users/{`{RegisterId}`}
-              </code>
-              .
+              Enter a registration ID to look up the matching user account and
+              review the details returned by the system.
             </p>
           </div>
 
@@ -322,39 +357,14 @@ export default function ManageUserPage() {
                       </p>
                     </div>
 
-                    <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        Faculty ID
-                      </p>
-                      <p className="mt-2 text-base font-semibold text-slate-900">
-                        {user.FacultyId ?? "-"}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        Department ID
-                      </p>
-                      <p className="mt-2 text-base font-semibold text-slate-900">
-                        {user.DepartmentId ?? "-"}
-                      </p>
-                    </div>
                   </div>
 
                   <div className="border-t border-slate-200 bg-white px-5 py-4">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <ShieldIcon />
-                        <span>
-                          The backend controls which fields are returned. If a
-                          field is missing, we display a safe fallback.
-                        </span>
-                      </div>
-
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
                       <button
                         type="button"
                         onClick={() => setConfirmDeleteOpen(true)}
-                        className="inline-flex items-center justify-center rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-500"
+                        className="inline-flex w-full items-center justify-center rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-500 sm:w-auto"
                       >
                         Delete user
                       </button>
