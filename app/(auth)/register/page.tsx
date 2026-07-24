@@ -29,34 +29,136 @@ const faculties: Faculty[] = [
   { id: 8, name: "Faculty of Agricultural Sciences", code: "FAS" },
 ];
 
+
 const departments: Department[] = [
-  { id: 1, name: "Agribusiness Management", facultyId: 1 },
-  { id: 2, name: "Export Agriculture", facultyId: 1 },
-  { id: 3, name: "Livestock Production", facultyId: 1 },
-  { id: 4, name: "Food Science & Technology", facultyId: 1 },
-  { id: 5, name: "Natural Resources", facultyId: 2 },
-  { id: 6, name: "Physical Sciences & Technology", facultyId: 2 },
-  { id: 7, name: "Computing & Information Systems", facultyId: 2 },
-  { id: 8, name: "Sports Sciences & Physical Education", facultyId: 2 },
-  { id: 9, name: "CPRSG", facultyId: 3 },
-  { id: 10, name: "Surveying and Geodesy", facultyId: 3 },
-  { id: 11, name: "Accountancy and Finance", facultyId: 4 },
-  { id: 12, name: "Business Management", facultyId: 4 },
-  { id: 13, name: "Marketing Management", facultyId: 4 },
-  { id: 14, name: "Tourism Management", facultyId: 4 },
-  { id: 15, name: "Economics and Statistics", facultyId: 5 },
-  { id: 16, name: "English Language Teaching", facultyId: 5 },
-  { id: 17, name: "Languages", facultyId: 5 },
-  { id: 18, name: "Social Sciences", facultyId: 5 },
-  { id: 19, name: "Biosystems Technology", facultyId: 7 },
-  { id: 20, name: "Engineering Technology", facultyId: 7 },
+  // Faculty of Agricultural Sciences
+  {
+    id: 1,
+    name: "Agribusiness Management",
+    facultyId: 8,
+  },
+  {
+    id: 2,
+    name: "Export Agriculture",
+    facultyId: 8,
+  },
+  {
+    id: 3,
+    name: "Livestock Production",
+    facultyId: 8,
+  },
+
+  // Faculty of Applied Sciences
+  {
+    id: 4,
+    name: "Food Science & Technology",
+    facultyId: 2,
+  },
+  {
+    id: 5,
+    name: "Natural Resources",
+    facultyId: 2,
+  },
+  {
+    id: 6,
+    name: "Physical Sciences & Technology",
+    facultyId: 2,
+  },
+  {
+    id: 7,
+    name: "Computing & Information Systems",
+    facultyId: 2,
+  },
+  {
+    id: 8,
+    name: "Sports Sciences & Physical Education",
+    facultyId: 2,
+  },
+
+  // Faculty of Geomatics
+  {
+    id: 9,
+    name: "CPRSG",
+    facultyId: 4,
+  },
+  {
+    id: 10,
+    name: "Surveying and Geodesy",
+    facultyId: 4,
+  },
+
+  // Faculty of Management Studies
+  {
+    id: 11,
+    name: "Accountancy and Finance",
+    facultyId: 6,
+  },
+  {
+    id: 12,
+    name: "Business Management",
+    facultyId: 6,
+  },
+  {
+    id: 13,
+    name: "Marketing Management",
+    facultyId: 6,
+  },
+  {
+    id: 14,
+    name: "Tourism Management",
+    facultyId: 6,
+  },
+
+  // Faculty of Social Sciences & Languages
+  {
+    id: 15,
+    name: "Economics and Statistics",
+    facultyId: 3,
+  },
+  {
+    id: 16,
+    name: "English Language Teaching",
+    facultyId: 3,
+  },
+  {
+    id: 17,
+    name: "Languages",
+    facultyId: 3,
+  },
+  {
+    id: 18,
+    name: "Social Sciences",
+    facultyId: 3,
+  },
+
+  // Faculty of Technology
+  {
+    id: 19,
+    name: "Biosystems Technology",
+    facultyId: 5,
+  },
+  {
+    id: 20,
+    name: "Engineering Technology",
+    facultyId: 5,
+  },
+
+  // Faculty of Computing
   {
     id: 21,
     name: "Department of Computing & Information Systems",
-    facultyId: 8,
+    facultyId: 1,
   },
-  { id: 22, name: "Department of Software Engineering", facultyId: 8 },
-  { id: 23, name: "Department of Data Science", facultyId: 8 },
+  {
+    id: 22,
+    name: "Department of Software Engineering",
+    facultyId: 1,
+  },
+  {
+    id: 23,
+    name: "Department of Data Science",
+    facultyId: 1,
+  },
 ];
 
 type FormState = {
