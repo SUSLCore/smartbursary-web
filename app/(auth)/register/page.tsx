@@ -19,14 +19,14 @@ type Department = {
 };
 
 const faculties: Faculty[] = [
-  { id: 1, name: "Faculty of Agricultural Sciences", code: "FAS" },
+  { id: 1, name: "Faculty of Computing", code: "FC" },
   { id: 2, name: "Faculty of Applied Sciences", code: "FAPS" },
-  { id: 3, name: "Faculty of Geomatics", code: "FG" },
-  { id: 4, name: "Faculty of Management Studies", code: "FMS" },
-  { id: 5, name: "Faculty of Social Sciences & Languages", code: "FSSL" },
-  { id: 6, name: "Faculty of Medicine", code: "FM" },
-  { id: 7, name: "Faculty of Technology", code: "FT" },
-  { id: 8, name: "Faculty of Computing", code: "FC" },
+  { id: 3, name: "Faculty of Social Sciences & Languages", code: "FSSL" },
+  { id: 4, name: "Faculty of Geomatics", code: "FG" },
+  { id: 5, name: "Faculty of Technology", code: "FT" },
+  { id: 6, name: "Faculty of Management Studies", code: "FMS" },
+  { id: 7, name: "Faculty of Medicine", code: "FM" },
+  { id: 8, name: "Faculty of Agricultural Sciences", code: "FAS" },
 ];
 
 const departments: Department[] = [
