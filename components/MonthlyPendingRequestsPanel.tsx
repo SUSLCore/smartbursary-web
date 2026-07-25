@@ -14,7 +14,6 @@ import monthlyFlowService, {
   type MonthlyMyUploadItem,
   type MonthlyDocumentRecord,
 } from "@/services/monthlyFlow.service";
-import ConfirmationCard from "@/components/ConfirmationCard";
 
 type PanelVariant = "compact" | "featured";
 
@@ -23,11 +22,6 @@ type NoticeTone = "success" | "error" | "info";
 type NoticeState = {
   tone: NoticeTone;
   text: string;
-} | null;
-
-type RejectConfirmationState = {
-  documentId: number;
-  remarks: string;
 } | null;
 
 const emptyNotice: NoticeState = null;
@@ -186,17 +180,15 @@ export default function MonthlyPendingRequestsPanel({
   const [uploadingDocumentId, setUploadingDocumentId] = useState<number | null>(
     null
   );
-  const [signedRemarksById, setSignedRemarksById] = useState<
+  const [sharedRemarksById, setSharedRemarksById] = useState<
     Record<number, string>
   >({});
-  const [rejectRemarksById, setRejectRemarksById] = useState<
+  const [pendingReturnRemarksById, setPendingReturnRemarksById] = useState<
     Record<number, string>
   >({});
-  const [rejectingDocumentId, setRejectingDocumentId] = useState<number | null>(
-    null
-  );
-  const [rejectConfirmation, setRejectConfirmation] =
-    useState<RejectConfirmationState>(null);
+  const [returningPendingDocumentId, setReturningPendingDocumentId] = useState<
+    number | null
+  >(null);
   const [detailNotice, setDetailNotice] = useState<NoticeState>(emptyNotice);
   const mountedRef = useRef(true);
 
@@ -476,35 +468,22 @@ export default function MonthlyPendingRequestsPanel({
     document.getElementById(`signed-document-input-${documentId}`)?.click();
   };
 
-  const handleOpenRejectConfirmation = (
-    documentId: number,
-    event?: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event?.stopPropagation();
+  const handleReturnPendingDocument = async (documentId: number) => {
+    const remarks = pendingReturnRemarksById[documentId]?.trim();
 
-    const remarks = rejectRemarksById[documentId] ?? "";
-
-    if (!remarks.trim()) {
-      setMyUploadsNotice({
+    if (!remarks) {
+      setDetailNotice({
         tone: "error",
-        text: "Please enter rejection remarks before rejecting the document.",
+        text: "Please add return remarks before sending the file back.",
       });
       return;
     }
 
-    setRejectConfirmation({ documentId, remarks });
-  };
-
-  const handleConfirmReject = async () => {
-    if (!rejectConfirmation) {
-      return;
-    }
-
-    const { documentId, remarks } = rejectConfirmation;
-    setRejectingDocumentId(documentId);
+    setReturningPendingDocumentId(documentId);
+    setDetailNotice(emptyNotice);
 
     try {
-      const response = await monthlyFlowService.rejectMonthlyDocument(
+      const response = await monthlyFlowService.returnMonthlyDocument(
         documentId,
         remarks
       );
@@ -513,33 +492,31 @@ export default function MonthlyPendingRequestsPanel({
         return;
       }
 
-      setMyUploadsNotice({
+      setDetailNotice({
         tone: "success",
         text:
-          response.message ??
-          `Document #${documentId} rejected successfully.`,
+          response.message ?? `Document #${documentId} returned successfully.`,
       });
 
-      setRejectRemarksById((current) => ({
+      setPendingReturnRemarksById((current) => ({
         ...current,
         [documentId]: "",
       }));
 
-      await handleLoadMyUploads();
-      setRejectConfirmation(null);
+      await loadPendingRequests();
     } catch (error) {
       console.error(error);
 
       if (mountedRef.current) {
         const err = error as { message?: string };
-        setMyUploadsNotice({
+        setDetailNotice({
           tone: "error",
-          text: err.message ?? "Could not reject that document right now.",
+          text: err.message ?? "Could not return that file right now.",
         });
       }
     } finally {
       if (mountedRef.current) {
-        setRejectingDocumentId((current) =>
+        setReturningPendingDocumentId((current) =>
           current === documentId ? null : current
         );
       }
@@ -567,7 +544,7 @@ export default function MonthlyPendingRequestsPanel({
       return;
     }
 
-    const remarks = signedRemarksById[documentId]?.trim();
+    const remarks = sharedRemarksById[documentId]?.trim();
 
     if (!remarks) {
       setDetailNotice({
@@ -595,7 +572,7 @@ export default function MonthlyPendingRequestsPanel({
         setSelectedDocument(response.data);
       }
 
-      setSignedRemarksById((current) => ({
+      setSharedRemarksById((current) => ({
         ...current,
         [documentId]: "",
       }));
@@ -805,39 +782,6 @@ export default function MonthlyPendingRequestsPanel({
                     )}
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <label className="block text-sm font-medium text-[#17365d]">
-                      Reject remarks
-                      <textarea
-                        value={rejectRemarksById[item.id] ?? ""}
-                        onChange={(event) =>
-                          setRejectRemarksById((current) => ({
-                            ...current,
-                            [item.id]: event.target.value,
-                          }))
-                        }
-                        placeholder="Please correct the student account number before proceeding."
-                        rows={3}
-                        className="mt-2 w-full resize-y rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-red-400 focus:ring-4 focus:ring-red-100"
-                      />
-                    </label>
-
-                    <div className="mt-3 flex flex-wrap items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={(event) =>
-                          handleOpenRejectConfirmation(item.id, event)
-                        }
-                        disabled={rejectingDocumentId === item.id}
-                        className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        Reject
-                      </button>
-                      <p className="text-xs text-slate-500">
-                        The rejection will be submitted after confirmation.
-                      </p>
-                    </div>
-                  </div>
                 </div>
               ))}
             </div>
@@ -928,53 +872,71 @@ export default function MonthlyPendingRequestsPanel({
 
                 <div className="mt-4 flex flex-col gap-3">
                   <label className="block text-sm font-medium text-[#17365d]">
-                    Signed document remarks
+                    Remarks
                     <textarea
-                      value={signedRemarksById[record.id] ?? ""}
+                      value={sharedRemarksById[record.id] ?? ""}
                       onChange={(event) =>
-                        setSignedRemarksById((current) => ({
+                        setSharedRemarksById((current) => ({
                           ...current,
                           [record.id]: event.target.value,
                         }))
                       }
                       onClick={(event) => event.stopPropagation()}
-                      placeholder="Enter remarks for the signed upload"
+                      placeholder="Enter remarks for upload signed or return."
                       rows={3}
                       className="mt-2 w-full resize-y rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#27b8d2] focus:ring-4 focus:ring-[#27b8d2]/10"
                     />
                   </label>
 
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <button
                       type="button"
-                      onClick={(event) =>
-                        void handleDownloadDocument(record.id, event)
-                      }
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void handleDownloadDocument(record.id, event);
+                      }}
                       disabled={downloadingDocumentId === record.id}
-                      className="ml-auto inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 transition hover:border-blue-300 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-70"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 transition hover:border-blue-300 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       <DownloadIcon />
                       {downloadingDocumentId === record.id
                         ? "Downloading..."
                         : "Download"}
                     </button>
+
                     <button
                       type="button"
-                      onClick={(event) =>
-                        handleOpenSignedUpload(
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void handleOpenSignedUpload(
                           record.id,
-                          signedRemarksById[record.id] ?? "",
+                          sharedRemarksById[record.id] ?? "",
                           event
-                        )
-                      }
+                        );
+                      }}
                       disabled={uploadingDocumentId === record.id}
-                      className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-70"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       <UploadIcon />
                       {uploadingDocumentId === record.id
                         ? "Uploading..."
                         : "Upload signed"}
                     </button>
+
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void handleReturnPendingDocument(record.id);
+                      }}
+                      disabled={returningPendingDocumentId === record.id}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-amber-700 transition hover:border-amber-300 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {returningPendingDocumentId === record.id
+                        ? "Returning..."
+                        : "Return"}
+                    </button>
+
                     <input
                       id={`signed-document-input-${record.id}`}
                       type="file"
@@ -1079,26 +1041,6 @@ export default function MonthlyPendingRequestsPanel({
           })}
         </div>
       )}
-
-      <ConfirmationCard
-        open={Boolean(rejectConfirmation)}
-        title="Reject this document?"
-        description={
-          rejectConfirmation
-            ? `This will reject document #${rejectConfirmation.documentId}. Please confirm before continuing.`
-            : ""
-        }
-        confirmText="Reject"
-        cancelText="Cancel"
-        loading={
-          rejectConfirmation
-            ? rejectingDocumentId === rejectConfirmation.documentId
-            : false
-        }
-        destructive
-        onConfirm={() => void handleConfirmReject()}
-        onCancel={() => setRejectConfirmation(null)}
-      />
 
       {detailNotice && (
         <div
