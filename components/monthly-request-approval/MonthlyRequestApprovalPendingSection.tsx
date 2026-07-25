@@ -168,36 +168,38 @@ function PendingDocumentCard({
           />
         </label>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onDownload(record.id)}
-            disabled={downloadingPendingId === record.id}
-            className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 transition hover:border-blue-300 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            <DownloadIcon />
-            {downloadingPendingId === record.id ? "Downloading..." : "Download"}
-          </button>
+        <div className="mt-4 space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => onDownload(record.id)}
+              disabled={downloadingPendingId === record.id}
+              className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 transition hover:border-blue-300 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <DownloadIcon />
+              {downloadingPendingId === record.id ? "Downloading..." : "Download"}
+            </button>
 
-          <button
-            type="button"
-            onClick={() => onComplete(record.id)}
-            disabled={completingPendingId === record.id}
-            className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            <CheckCircleIcon />
-            {completingPendingId === record.id ? "Completing..." : "Mark complete"}
-          </button>
+            <button
+              type="button"
+              onClick={() => onComplete(record.id)}
+              disabled={completingPendingId === record.id}
+              className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <CheckCircleIcon />
+              {completingPendingId === record.id ? "Completing..." : "Mark complete"}
+            </button>
 
-          <button
-            type="button"
-            onClick={() => onReturn(record.id)}
-            disabled={returningPendingId === record.id}
-            className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-amber-700 transition hover:border-amber-300 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            <ReturnIcon />
-            {returningPendingId === record.id ? "Returning..." : "Return"}
-          </button>
+            <button
+              type="button"
+              onClick={() => onReturn(record.id)}
+              disabled={returningPendingId === record.id}
+              className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-amber-700 transition hover:border-amber-300 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <ReturnIcon />
+              {returningPendingId === record.id ? "Returning..." : "Return"}
+            </button>
+          </div>
 
           <p className="text-xs text-slate-500">
             The return action sends the file back with the remarks you entered
