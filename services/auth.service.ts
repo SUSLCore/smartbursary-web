@@ -54,6 +54,30 @@ export type LogoutResponse = {
 	message: string;
 };
 
+export type ForgotPasswordPayload = {
+	email: string;
+};
+
+export type ForgotPasswordResponse = {
+	success: boolean;
+	message: string;
+};
+
+export type VerifyOtpPayload = {
+	email: string;
+	otp: string;
+};
+
+export type VerifyOtpResponse = {
+	success: boolean;
+	message: string;
+};
+
+export type ResetPasswordResponse = {
+	success: boolean;
+	message: string;
+};
+
 export const authService = {
 	async registerStudent(payload: RegisterStudentPayload) {
 		const response = await axiosInstance.post<ApiResponse<UserRecord>>(
@@ -108,6 +132,39 @@ export const authService = {
 
 	async logout() {
 		const response = await axiosInstance.post<LogoutResponse>("/api/auth/logout", {});
+
+		return response.data;
+	},
+
+	async forgotPassword(email: string) {
+		const response = await axiosInstance.post<ForgotPasswordResponse>(
+			"/api/password-reset/forgot-password",
+			{ email },
+		);
+
+		return response.data;
+	},
+
+	async verifyOtp(payload: VerifyOtpPayload) {
+		const response = await axiosInstance.post<VerifyOtpResponse>(
+			"/api/password-reset/verify-otp",
+			payload,
+		);
+
+		return response.data;
+	},
+
+	async resetPassword(password: string, confirmPassword: string) {
+		const response = await axiosInstance.post<ResetPasswordResponse>(
+			"/api/password-reset/reset-password",
+			{
+				password,
+				confirmPassword,
+			},
+			{
+				withCredentials: true,
+			},
+		);
 
 		return response.data;
 	},

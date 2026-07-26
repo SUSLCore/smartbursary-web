@@ -6,9 +6,9 @@ import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import toast from "react-hot-toast";
 
 import authService from "@/services/auth.service";
 
@@ -44,7 +44,16 @@ function Spinner() {
 function EyeIcon({ open }: { open: boolean }) {
 	if (open) {
 		return (
-			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+			<svg
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			>
 				<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
 				<path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
 				<path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
@@ -54,14 +63,23 @@ function EyeIcon({ open }: { open: boolean }) {
 	}
 
 	return (
-		<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+		<svg
+			width="20"
+			height="20"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
 			<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
 			<circle cx="12" cy="12" r="3" />
 		</svg>
 	);
 }
 
-export default function ChangePasswordPage() {
+export default function ResetPasswordPage() {
 	const router = useRouter();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
@@ -93,12 +111,14 @@ export default function ChangePasswordPage() {
 
 			toast.error(response.message || "Unable to reset password. Please try again.");
 		} catch (error: unknown) {
+			const status = isAxiosError(error) ? error.response?.status : undefined;
 			const message = isAxiosError<{ success?: boolean; message?: string }>(error)
 				? error.response?.data?.message ?? "Internal Server Error"
 				: "Internal Server Error";
+
 			toast.error(message);
 
-			if (isAxiosError(error) && error.response?.status === 401) {
+			if (status === 401) {
 				router.push("/forgot_pwd");
 			}
 		} finally {
@@ -118,7 +138,7 @@ export default function ChangePasswordPage() {
 				<div className="h-2 w-full bg-linear-to-r from-[#27b8d2] to-[#17365d]" />
 
 				<div className="px-6 py-10 sm:px-10 sm:py-12">
-					<div className="mb-8 flex flex-col items-center text-center">
+					<div className="mb-9 flex flex-col items-center text-center">
 						<div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-[#e9ebf2] ring-1 ring-[#27b8d2]/20">
 							<Image
 								src="/images/smartbursery-logo.png"
@@ -161,7 +181,9 @@ export default function ChangePasswordPage() {
 									<EyeIcon open={showPassword} />
 								</button>
 							</div>
-							{errors.password ? <p className="mt-2 text-sm text-red-600">{errors.password.message}</p> : null}
+							{errors.password ? (
+								<p className="mt-2 text-sm text-red-600">{errors.password.message}</p>
+							) : null}
 						</label>
 
 						<label className="mb-5 block">
@@ -210,7 +232,10 @@ export default function ChangePasswordPage() {
 
 					<p className="mt-6 text-center text-sm text-slate-500">
 						Back to{" "}
-						<Link href="/login" className="font-semibold text-[#27b8d2] transition hover:text-[#17365d] hover:underline">
+						<Link
+							href="/login"
+							className="font-semibold text-[#27b8d2] transition hover:text-[#17365d] hover:underline"
+						>
 							Login
 						</Link>
 					</p>
