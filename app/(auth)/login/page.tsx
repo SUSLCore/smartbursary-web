@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 
 import { clearAuthError } from "@/features/auth/authSlice";
@@ -31,6 +31,7 @@ function getDashboardPath(role: string | null) {
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
 
   const { status, error, role, isAuthenticated } = useSelector(
@@ -41,6 +42,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const resetMessage = searchParams.get("message");
 
   const isLoading = status === "loading";
   const formError = useMemo(
@@ -119,6 +121,24 @@ export default function LoginPage() {
 
           {/* Form */}
           <form onSubmit={onSubmit} className="w-full">
+            {resetMessage ? (
+              <p className="mb-5 flex items-start gap-2 rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-800">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="mt-0.5 shrink-0"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+                <span>{resetMessage}</span>
+              </p>
+            ) : null}
+
             <label className="mb-5 block">
               <span className="mb-2 block text-[14px] font-semibold text-[#17365d]">
                 Email Address
@@ -249,6 +269,14 @@ export default function LoginPage() {
             </button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-500">
+            <Link
+              href="/forgot_pwd"
+              className="font-semibold text-[#27b8d2] transition hover:text-[#17365d] hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </p>
+          <p className="mt-3 text-center text-sm text-slate-500">
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
