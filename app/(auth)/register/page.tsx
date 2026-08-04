@@ -328,7 +328,7 @@ export default function RegisterPage() {
                   setForm((prev) => ({ ...prev, email: event.target.value }))
                 }
                 className="h-13 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-[15px] text-[#17365d] outline-none transition placeholder:text-slate-400 focus:border-[#27b8d2] focus:bg-white focus:ring-4 focus:ring-[#27b8d2]/10"
-                placeholder="binoj@student.com"
+                placeholder="student@gmail.com"
                 autoComplete="email"
               />
             </label>
