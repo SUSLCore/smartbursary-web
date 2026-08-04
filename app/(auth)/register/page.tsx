@@ -276,8 +276,7 @@ export default function RegisterPage() {
               CREATE STUDENT ACCOUNT
             </h1>
             <p className="mt-2 text-sm text-slate-500">
-              Select faculty first, then choose a department and complete
-              registration
+              Select faculty ,then choose department and complete your registration process
             </p>
           </div>
 
